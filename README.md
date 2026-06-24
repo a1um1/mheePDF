@@ -8,8 +8,15 @@
 ```bash
 bun install mheepdf
 ```
+| Implementations | Result |
+| :---         |     :---:      |
+| Text Left    |  Text Center   |
 
-```typescript
+<table>
+<tr><td> Implementations </td> <td> Result </td></tr>
+<tr>
+<td>
+		```typescript
 import { MheePDF } from "mheepdf";
 
 const pdf = new MheePDF({
@@ -21,8 +28,15 @@ const pdf = new MheePDF({
 pdf.addText("Hello World");
 pdf.addText("Automatic Multiple Line!");
 pdf.addText("\n");
-pdf.addText(`Lorem ipsum ...`);
+pdf.addText("Lorem ipsum ...");
 
 await Bun.write("test.pdf", pdf.generatePDFcontent());
 ```
-<img src="docs/resources/BasicUsage.png" width="100%" >
+		
+</td>
+		<td>
+			<img src="docs/resources/usage/basic.png" width="100%" >
+	
+		</td>
+	</tr>
+</table>
