@@ -32,6 +32,8 @@ jobs:
 
       - name: Update annotated tag with notes
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -f -a ${{ github.ref_name }} -m "${{ steps.notes.outputs.result }}"
           git push origin ${{ github.ref_name }} --force
 
