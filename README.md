@@ -1,4 +1,4 @@
-![Logo](/docs/resources/logo.svg | width=100)
+![Logo](/docs/resources/logo.svg){height=100}
 
 
 # MheePDF
