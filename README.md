@@ -42,9 +42,7 @@ await Bun.write("test.pdf", pdf.generatePDFcontent());
 	</tr>
 	<tr>
 		<td>
-		
-> [!CAUTION]
-> Usage with Thai must include Thai font
+
 ```typescript
 // Basic Usage With Thai
 const fontBuffer = await Bun.file("./THSarabunNew.ttf").arrayBuffer();
@@ -61,7 +59,8 @@ pdf.addText("จัดหน้าอัตโนมัติ เท่ไหม
 pdf.addText("\n");
 pdf.addText("เพื่อที่โลกาภิวัฒน์หรือ ...");
 ```
-
+> [!CAUTION]
+> Usage with Thai must include Thai font
 </td>
 		<td>
 			<img src="docs/resources/usage/thai.png" width="100%" >
