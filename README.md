@@ -1,8 +1,11 @@
 <img src="docs/resources/logo.svg" width="100" height="100">
 
 # MheePDF - หมี PDF
+[![Publish to npm](https://github.com/a1um1/mheePDF/actions/workflows/publish.yml/badge.svg)](https://github.com/a1um1/mheePDF/actions/workflows/publish.yml)
+![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/a1um1/mheePDF)
 
-🚧 Construction
+> [!IMPORTANT]
+> This project is currently under development and may not be production-ready. Use with caution.
 
 # Usage
 ```bash
