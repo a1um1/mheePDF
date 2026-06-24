@@ -1,8 +1,7 @@
-![Logo](/docs/resources/logo.svg){height=100}
+<img src="docs/resources/logo.svg" width="100" height="100">
 
 
-# MheePDF
-หมี PDF
+# MheePDF - หมี PDF
 
 
 
