@@ -18,13 +18,13 @@ function cleanType(typeStr: string): string {
 
 function formatTypeString(typeStr: string): string {
   if (typeStr.includes("](") && !typeStr.includes("{")) {
-    return typeStr.replace(/(?<!\\)\|/g, "\\|");
+    return typeStr.replace(/\\\|/g, "|");
   }
 
   const cleaned = cleanType(typeStr);
 
   if (!cleaned.includes("{")) {
-    return `\`${cleaned}\``.replace(/(?<!\\)\|/g, "\\|");
+    return `\`${cleaned}\``;
   }
 
   let indent = 0;
@@ -62,7 +62,239 @@ function formatTypeString(typeStr: string): string {
   let formatted = result.replace(/(<br>\s*)+<br>/g, "<br>").trim();
   const html = `<code class="vp-api-type-block">${formatted}</code>`;
 
-  return html.replace(/(?<!\\)\|/g, "\\|");
+  return html;
+}
+
+function extractCleanName(cell: string): string {
+  // Remove HTML comments and tags
+  let cleaned = cell.replace(/<[^>]*>/g, "");
+  // Remove markdown links like [foo](bar) -> foo
+  cleaned = cleaned.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+  // Remove backticks
+  cleaned = cleaned.replace(/`/g, "");
+  // Trim spaces
+  cleaned = cleaned.trim();
+  // Remove trailing optional sign '?'
+  if (cleaned.endsWith("?")) {
+    cleaned = cleaned.slice(0, -1);
+  }
+  return cleaned.trim();
+}
+
+function stripParentPrefix(cell: string, parentCleanName: string): string {
+  const prefix = parentCleanName + ".";
+  if (cell.includes(prefix)) {
+    return cell.replace(prefix, "");
+  }
+  // Fallback in case of backticks around individual parts:
+  const backtickPrefix = "`" + parentCleanName + ".";
+  if (cell.includes(backtickPrefix)) {
+    return cell.replace(backtickPrefix, "`");
+  }
+  return cell;
+}
+
+function parseTableLine(line: string): string[] {
+  const cols = line.split(/(?<!\\)\|/).map((c) => c.trim());
+  if (cols.length > 0 && cols[0] === "") cols.shift();
+  if (cols.length > 0 && cols[cols.length - 1] === "") cols.pop();
+  return cols;
+}
+
+function htmlifyCellContent(cellStr: string): string {
+  if (cellStr.startsWith('<code class="vp-api-type-block">')) {
+    return cellStr;
+  }
+
+  let html = cellStr.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+    let cleanUrl = url;
+    if (cleanUrl.endsWith(".md")) {
+      cleanUrl = cleanUrl.slice(0, -3) + ".html";
+    } else if (cleanUrl.includes(".md#")) {
+      cleanUrl = cleanUrl.replace(".md#", ".html#");
+    }
+    return `<a href="${cleanUrl}">${text}</a>`;
+  });
+  html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+
+  const tags: string[] = [];
+  const htmlTagRegex = /<\/?(a|code|span|div|label|input|br)\b[^>]*>/gi;
+  html = html.replace(htmlTagRegex, (match) => {
+    tags.push(match);
+    return `__HTML_TAG_${tags.length - 1}__`;
+  });
+
+  html = html.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  html = html.replace(/__HTML_TAG_(\d+)__/g, (_, idx) => tags[parseInt(idx)]);
+  
+  // Clean all escaped pipes
+  html = html.replace(/\\\|/g, "|");
+  
+  return html;
+}
+
+function processTable(tableLines: string[]): string {
+  if (tableLines.length < 3) {
+    return tableLines.join("\n");
+  }
+
+  // 1. Parse header
+  const headerCols = parseTableLine(tableLines[0]);
+
+  // 2. Identify key columns
+  const propertyColIdx = headerCols.findIndex(
+    (c) =>
+      c.toLowerCase() === "property" ||
+      c.toLowerCase() === "parameter" ||
+      c.toLowerCase() === "member" ||
+      c.toLowerCase() === "name",
+  );
+  const typeColIdx = headerCols.findIndex((c) => c.toLowerCase() === "type");
+  const definedInColIdx = headerCols.findIndex((c) => c.toLowerCase() === "defined in");
+
+  // 3. Parse data rows
+  const dataRows: string[][] = [];
+  for (let i = 2; i < tableLines.length; i++) {
+    const cols = parseTableLine(tableLines[i]);
+    if (cols.length > 0) {
+      dataRows.push(cols);
+    }
+  }
+
+  // 4. Extract clean names
+  const cleanNames = dataRows.map((row) => {
+    if (propertyColIdx !== -1 && row[propertyColIdx]) {
+      return extractCleanName(row[propertyColIdx]);
+    }
+    return "";
+  });
+
+  // Identify which cleanName is a parent
+  const parentNamesSet = new Set<string>();
+  for (let i = 0; i < cleanNames.length; i++) {
+    const name = cleanNames[i];
+    if (!name) continue;
+    const isParent = cleanNames.some((other) => other && other.startsWith(name + "."));
+    if (isParent) {
+      parentNamesSet.add(name);
+    }
+  }
+
+  // Build the HTML Table
+  let html = `<div class="vp-api-table-wrapper">\n`;
+  html += `<table>\n`;
+
+  // Header
+  html += `  <thead>\n    <tr>\n`;
+  headerCols.forEach((colName, idx) => {
+    if (idx === definedInColIdx) return;
+    html += `      <th>${colName}</th>\n`;
+  });
+  html += `    </tr>\n  </thead>\n`;
+
+  // Body
+  html += `  <tbody>\n`;
+
+  dataRows.forEach((row, i) => {
+    const cleanName = cleanNames[i];
+    const isParent = parentNamesSet.has(cleanName);
+
+    let parentPath = "";
+    let depth = 0;
+    if (cleanName) {
+      const parts = cleanName.split(".");
+      depth = parts.length - 1;
+      if (depth > 0) {
+        parentPath = parts.slice(0, -1).join(".");
+      }
+    }
+
+    const safeId = cleanName.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase();
+
+    // 1. Process Type cell
+    let typeCell = row[typeColIdx] || "";
+    if (typeColIdx !== -1) {
+      if (isParent && typeCell.includes("{")) {
+        typeCell = `<code>object</code>`;
+      } else {
+        typeCell = htmlifyCellContent(formatTypeString(typeCell));
+      }
+    }
+
+    // 2. Process Defined In & Property cells
+    let fileLink = "";
+    if (definedInColIdx !== -1 && row[definedInColIdx]) {
+      const srcCell = row[definedInColIdx];
+      const srcMatch = srcCell.match(/\[([^\]]+)\]\(([^)]+)\)/);
+      if (srcMatch) {
+        const linkText = srcMatch[1];
+        const linkUrl = srcMatch[2];
+        const fileName = linkText.split("/").pop();
+        fileLink = `<br><span style="font-size: 0.8em; opacity: 0.7;margin-top:-6px;display:block;"><a href="${linkUrl}">${fileName}</a></span>`;
+      }
+    }
+
+    let propCell = row[propertyColIdx] || "";
+    let displayName = propCell;
+    if (depth > 0 && parentPath) {
+      displayName = stripParentPrefix(propCell, parentPath);
+    }
+    displayName = htmlifyCellContent(displayName);
+
+    const propMatch = propCell.match(/(<a id="([^"]+)">.*?<\/a>\s*)(.+)/);
+    let cellContent = "";
+    if (propMatch) {
+      const anchorHtml = propMatch[1];
+      const anchorId = propMatch[2];
+      const rawNamePart = propMatch[3];
+      const displayNamePart =
+        depth > 0 && parentPath ? stripParentPrefix(rawNamePart, parentPath) : rawNamePart;
+      const formattedName = htmlifyCellContent(displayNamePart);
+      cellContent = `${anchorHtml}<a href="#${anchorId}">${formattedName}</a>${fileLink}`;
+    } else {
+      cellContent = `${displayName}${fileLink}`;
+    }
+
+    let nameCellHtml = "";
+    const paddingLeft = depth * 20 + 16;
+    const styleAttr = `style="padding-left: ${paddingLeft}px !important;"`;
+
+    if (isParent) {
+      nameCellHtml = `
+        <div class="vp-api-param-name-wrapper">
+          <span class="vp-api-toggle-label" aria-expanded="false" data-row-path="${cleanName}">
+            ${cellContent}
+          </span>
+        </div>
+      `;
+    } else {
+      nameCellHtml = cellContent;
+    }
+
+    let trAttrs = "";
+    if (depth > 0 && parentPath) {
+      trAttrs += ` class="vp-api-child-row" data-parent-path="${parentPath}"`;
+    }
+
+    html += `    <tr${trAttrs}>\n`;
+    row.forEach((cell, idx) => {
+      if (idx === definedInColIdx) return;
+      if (idx === propertyColIdx) {
+        html += `      <td ${styleAttr}>${nameCellHtml}</td>\n`;
+      } else if (idx === typeColIdx) {
+        html += `      <td>${typeCell}</td>\n`;
+      } else {
+        html += `      <td>${htmlifyCellContent(cell)}</td>\n`;
+      }
+    });
+    html += `    </tr>\n`;
+  });
+
+  html += `  </tbody>\n`;
+  html += `</table>\n`;
+  html += `</div>`;
+
+  return html;
 }
 
 function processMarkdown(content: string): string {
@@ -70,10 +302,7 @@ function processMarkdown(content: string): string {
   const processedLines: string[] = [];
 
   let inTable = false;
-  let headerCols: string[] = [];
-  let propertyColIdx = -1;
-  let definedInColIdx = -1;
-  let typeColIdx = -1;
+  let tableLines: string[] = [];
   let isFirstDefinedIn = true;
   let lastHeadingIdx = -1;
 
@@ -81,12 +310,43 @@ function processMarkdown(content: string): string {
     const line = lines[i];
     const trimmed = line.trim();
 
-    // Track heading line index in processedLines
+    if (trimmed === "## Extends") {
+      let nextIdx = i + 1;
+      while (nextIdx < lines.length && lines[nextIdx].trim() === "") {
+        nextIdx++;
+      }
+      if (nextIdx < lines.length && lines[nextIdx].trim().startsWith("- ")) {
+        const extendsLine = lines[nextIdx].trim();
+        const extendsMatch = extendsLine.match(/-\s+\[([^\]]+)\]\(([^)]+)\)/);
+        if (extendsMatch) {
+          const extendsText = extendsMatch[1].replace(/`/g, "");
+          let extendsUrl = extendsMatch[2];
+          if (extendsUrl.endsWith(".md")) {
+            extendsUrl = extendsUrl.slice(0, -3) + ".html";
+          } else if (extendsUrl.includes(".md#")) {
+            extendsUrl = extendsUrl.replace(".md#", ".html#");
+          }
+          const extendsHtml = `<span class="vp-api-extends-badge">Extends <a href="${extendsUrl}">${extendsText}<span></span></a></span>`;
+          const h1Idx = processedLines.findIndex(
+            (line) => line.trim().startsWith("# ") && !line.trim().startsWith("##"),
+          );
+          if (h1Idx !== -1) {
+            processedLines[h1Idx] = processedLines[h1Idx].trim() + " " + extendsHtml;
+          }
+          i = nextIdx;
+          continue;
+        }
+      }
+    }
+
+    if (trimmed === "## Constructors") {
+      continue;
+    }
+
     if (trimmed.startsWith("#")) {
       lastHeadingIdx = processedLines.length;
     }
 
-    // Skip original separators
     if (trimmed === "***" || trimmed === "---") {
       continue;
     }
@@ -102,7 +362,6 @@ function processMarkdown(content: string): string {
             `<p class="vp-api-defined-in-top">Defined in: <a href="${linkUrl}">${linkText}</a></p>`,
           );
         } else {
-          // Member-level: Append to the last matched heading
           if (lastHeadingIdx !== -1) {
             const heading = processedLines[lastHeadingIdx];
             processedLines[lastHeadingIdx] =
@@ -118,96 +377,46 @@ function processMarkdown(content: string): string {
     }
 
     if (trimmed.startsWith("|")) {
-      const cols = line.split(/(?<!\\)\|/).map((c) => c.trim());
-
       if (!inTable) {
-        // Detect table header that has "Defined in" and/or "Property" / "Parameter" / "Name" / "Type"
-        propertyColIdx = cols.findIndex(
-          (c) =>
-            c.toLowerCase() === "property" ||
-            c.toLowerCase() === "parameter" ||
-            c.toLowerCase() === "member" ||
-            c.toLowerCase() === "name",
-        );
-        typeColIdx = cols.findIndex((c) => c.toLowerCase() === "type");
-        definedInColIdx = cols.findIndex((c) => c.toLowerCase() === "defined in");
-
-        if (propertyColIdx !== -1 || typeColIdx !== -1) {
+        const nextLine = lines[i + 1];
+        if (nextLine && nextLine.trim().startsWith("|") && nextLine.includes("---")) {
           inTable = true;
-          headerCols = [...cols];
-
-          // Remove the "Defined in" column from header if it exists
-          if (definedInColIdx !== -1) {
-            cols.splice(definedInColIdx, 1);
-          }
-          processedLines.push(cols.join(" | "));
-          continue;
+          tableLines = [line];
+        } else {
+          processedLines.push(line);
         }
       } else {
-        // Table separator or data rows
-        if (cols.length === headerCols.length) {
-          if (line.includes("---")) {
-            // Remove divider column for alignment row if it exists
-            if (definedInColIdx !== -1) {
-              cols.splice(definedInColIdx, 1);
-            }
-            processedLines.push(cols.join(" | "));
-            continue;
-          }
-
-          // Clean Type cell formatting and format object types nicely
-          if (typeColIdx !== -1) {
-            cols[typeColIdx] = formatTypeString(cols[typeColIdx]);
-          }
-
-          // Data row processing for "Defined in" column merging
-          if (definedInColIdx !== -1 && propertyColIdx !== -1) {
-            const propCell = cols[propertyColIdx];
-            const srcCell = cols[definedInColIdx];
-
-            let updatedPropCell = propCell;
-
-            // 1. Parse Defined in cell link
-            const srcMatch = srcCell.match(/\[([^\]]+)\]\(([^)]+)\)/);
-            let fileLink = "";
-            if (srcMatch) {
-              const linkText = srcMatch[1];
-              const linkUrl = srcMatch[2];
-              const fileName = linkText.split("/").pop(); // Only show filename
-              fileLink = `<br><span style="font-size: 0.8em; opacity: 0.7;margin-top:-6px;display:block;">[${fileName}](${linkUrl})</span>`;
-            }
-
-            // 2. Parse Property cell and make name a link to its anchor
-            const propMatch = propCell.match(/(<a id="([^"]+)">.*?<\/a>\s*)(.+)/);
-            if (propMatch) {
-              const anchorHtml = propMatch[1];
-              const anchorId = propMatch[2];
-              const propName = propMatch[3];
-
-              // Format property name as a link to its anchor, and append small file link
-              updatedPropCell = `${anchorHtml}[${propName}](#${anchorId})${fileLink}`;
-            } else {
-              updatedPropCell = `${propCell}${fileLink}`;
-            }
-
-            cols[propertyColIdx] = updatedPropCell;
-            cols.splice(definedInColIdx, 1);
-          }
-
-          processedLines.push(cols.join(" | "));
-          continue;
-        } else {
-          inTable = false;
-        }
+        tableLines.push(line);
       }
     } else {
-      inTable = false;
+      if (inTable) {
+        processedLines.push(processTable(tableLines));
+        inTable = false;
+        tableLines = [];
+      }
+      processedLines.push(line);
     }
+  }
 
-    processedLines.push(line);
+  if (inTable) {
+    processedLines.push(processTable(tableLines));
   }
 
   return processedLines.join("\n");
+}
+
+function injectOutlineFalse(content: string): string {
+  if (content.startsWith("---")) {
+    const secondTripleDashIdx = content.indexOf("---", 3);
+    if (secondTripleDashIdx !== -1) {
+      const frontmatter = content.slice(3, secondTripleDashIdx);
+      if (!frontmatter.includes("outline:")) {
+        return `---${frontmatter}outline: false\n` + content.slice(secondTripleDashIdx);
+      }
+      return content;
+    }
+  }
+  return `---\noutline: false\n---\n\n` + content;
 }
 
 async function main() {
@@ -219,7 +428,7 @@ async function main() {
     const content = await readFile(filePath, "utf-8");
 
     // Process markdown content
-    const cleaned = processMarkdown(content);
+    const cleaned = injectOutlineFalse(processMarkdown(content));
 
     await writeFile(filePath, cleaned, "utf-8");
   }

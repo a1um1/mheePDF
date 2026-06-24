@@ -171,15 +171,18 @@ body {
 }
 
 /* Premium Table Styling for API Pages */
-.vp-doc[class*="_api_"] table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1.5rem 0;
-  overflow-x: auto;
-  display: block;
-  border: none !important;
+.vp-doc[class*="_api_"] .vp-api-table-wrapper {
+  width: 100% !important;
+  overflow-x: auto !important;
+  margin: 1rem 0 !important;
 }
-
+.vp-doc[class*="_api_"] table {
+  width: 100% !important;
+  display: table !important;
+  border-collapse: collapse;
+  border: none !important;
+	margin: 0;
+}
 .vp-doc[class*="_api_"] th {
   background-color: var(--vp-c-bg-soft) !important;
   color: var(--vp-c-text-1) !important;
@@ -225,5 +228,104 @@ body {
   color: var(--vp-c-brand-1) !important;
   margin: 4px 0 !important;
   max-width: fit-content;
+}
+
+/* Collapsible Parameter Toggles */
+.vp-api-toggle-checkbox {
+  display: none !important;
+}
+
+.vp-api-toggle-label {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.vp-api-toggle-label::before {
+  content: "▶";
+  display: inline-block;
+  font-size: 0.7em;
+  transition: transform 0.2s ease;
+  color: var(--vp-c-text-3);
+  width: 1em;
+  text-align: center;
+}
+
+/* Hover effects and alignment tweaks for the toggle */
+.vp-api-toggle-label:hover {
+  color: var(--vp-c-brand-1);
+}
+
+.vp-api-toggle-label:hover::before {
+  color: var(--vp-c-brand-1);
+}
+
+.vp-api-param-name-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* Collapse child rows by default */
+tr.vp-api-child-row {
+  display: none !important;
+}
+
+.vp-api-toggle-label[aria-expanded="true"]::before {
+  transform: rotate(90deg) !important;
+}
+
+/* Extends Class Badge */
+.vp-api-extends-badge {
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  font-family: var(--vp-font-family-mono) !important;
+  background-color: var(--vp-c-bg-soft) !important;
+  border: 1px solid var(--vp-c-divider) !important;
+  border-radius: 6px !important;
+  padding: 2px 8px !important;
+  color: var(--vp-c-text-2) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  position: relative !important;
+  text-transform: none !important;
+	height: 28px !important;
+}
+
+.vp-api-extends-badge a {
+  color: var(--vp-c-brand-1) !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+}
+.vp-api-extends-badge a span {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.vp-api-extends-badge a:hover {
+  text-decoration: underline !important;
+}
+
+/* Expand content width on API reference pages to fill the screen */
+.VPDoc:has(.vp-doc[class*="_api_"]) .container {
+  max-width: 100% !important;
+}
+
+.VPDoc:has(.vp-doc[class*="_api_"]) .content {
+  max-width: 100% !important;
+}
+
+.VPDoc:has(.vp-doc[class*="_api_"]) .content-container {
+  max-width: 100% !important;
+}
+
+.VPDoc:has(.vp-doc[class*="_api_"]) .aside {
+  display: none !important;
 }
 

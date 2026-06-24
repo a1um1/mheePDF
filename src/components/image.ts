@@ -54,7 +54,7 @@ export class Image implements Component {
     }
 
     // Detect format
-    if (this.buffer[0] === 0xFF && this.buffer[1] === 0xD8) {
+    if (this.buffer[0] === 0xff && this.buffer[1] === 0xd8) {
       this.format = "jpeg";
       const info = this.parseJPEG(this.buffer);
       this.imgWidth = info.width;
@@ -62,7 +62,7 @@ export class Image implements Component {
     } else if (
       this.buffer[0] === 0x89 &&
       this.buffer[1] === 0x50 &&
-      this.buffer[2] === 0x4E &&
+      this.buffer[2] === 0x4e &&
       this.buffer[3] === 0x47
     ) {
       this.format = "png";
@@ -104,18 +104,18 @@ export class Image implements Component {
   } {
     let offset = 2;
     while (offset < buf.length) {
-      if (buf[offset] !== 0xFF) {
+      if (buf[offset] !== 0xff) {
         offset++;
         continue;
       }
       const marker = buf[offset + 1];
       offset += 2;
-      if (marker === 0xD8 || marker === 0xD9 || (marker >= 0xD0 && marker <= 0xD7)) {
+      if (marker === 0xd8 || marker === 0xd9 || (marker >= 0xd0 && marker <= 0xd7)) {
         continue;
       }
       if (offset + 2 > buf.length) break;
       const length = (buf[offset]! << 8) | buf[offset + 1]!;
-      if (marker >= 0xC0 && marker <= 0xCF && marker !== 0xC4 && marker !== 0xCC) {
+      if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xcc) {
         if (offset + length > buf.length) break;
         const precision = buf[offset + 2]!;
         const height = (buf[offset + 3]! << 8) | buf[offset + 4]!;
@@ -204,7 +204,6 @@ export class Image implements Component {
       }
       const imageKey = writer.registerXObject(this.cachedXObjectRef);
       writer.drawImage(imageKey, renderX, renderY, drawWidth, drawHeight);
-
     } else if (this.format === "png") {
       if (!this.cachedXObjectRef) {
         const png = PNG.sync.read(this.buffer);

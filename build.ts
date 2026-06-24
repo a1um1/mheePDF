@@ -14,17 +14,11 @@ rmSync("dist", { recursive: true, force: true });
 mkdirSync("dist", { recursive: true });
 
 // External packages that cannot be bundled (WASM / native bindings)
-const external = [
-  "harfbuzzjs",
-  "opentype.js",
-  "@resvg/resvg-js",
-  "pngjs",
-  "@colordx/core",
-];
+const external = ["harfbuzzjs", "opentype.js", "@resvg/resvg-js", "pngjs", "@colordx/core"];
 
 console.log("▶ Building dist/index.js (ESM) …");
 const result = await Bun.build({
-  entrypoints: ["./index.ts"],
+  entrypoints: ["./src/index.ts"],
   outdir: "./dist",
   format: "esm",
   target: "node",

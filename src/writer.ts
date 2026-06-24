@@ -147,7 +147,13 @@ export class PDFPageWriter {
     return this;
   }
 
-  private drawSingleLineText(text: string, x: number, y: number, color?: Color, charSpacing?: number): void {
+  private drawSingleLineText(
+    text: string,
+    x: number,
+    y: number,
+    color?: Color,
+    charSpacing?: number,
+  ): void {
     let textStr = "";
     if (this.activeFontObject) {
       const { commands } = getPDFTextCommands(
@@ -237,11 +243,22 @@ export class PDFPageWriter {
       const fontName = this.currentFontKey || "Helvetica";
       return getStandardFontTextWidth(text, fontName, this.currentFontSize, charSpacing);
     }
-    const { width } = getPDFTextCommands(text, this.activeFontObject, this.currentFontSize, charSpacing);
+    const { width } = getPDFTextCommands(
+      text,
+      this.activeFontObject,
+      this.currentFontSize,
+      charSpacing,
+    );
     return width;
   }
 
-  drawTextLine(text: string, x: number, y: number, color?: Color | string, charSpacing?: number): this {
+  drawTextLine(
+    text: string,
+    x: number,
+    y: number,
+    color?: Color | string,
+    charSpacing?: number,
+  ): this {
     const leftMargin = this.margin.left;
     const bottomMargin = this.margin.bottom;
     const x_actual = x + leftMargin;
@@ -322,12 +339,10 @@ export class PDFPageWriter {
       resourcesObj.value.XObject = {};
     }
     const xRef = xObject.toRef();
-    const existingKey = Object.keys(resourcesObj.value.XObject).find(
-      (key) => {
-        const ref = resourcesObj.value.XObject[key];
-        return ref.id === xRef.id;
-      }
-    );
+    const existingKey = Object.keys(resourcesObj.value.XObject).find((key) => {
+      const ref = resourcesObj.value.XObject[key];
+      return ref.id === xRef.id;
+    });
     if (existingKey) {
       return existingKey;
     }
@@ -336,18 +351,14 @@ export class PDFPageWriter {
     return key;
   }
 
-  drawImage(
-    imageKey: string,
-    x: number,
-    y: number,
-    width: number,
-    height: number
-  ): this {
+  drawImage(imageKey: string, x: number, y: number, width: number, height: number): this {
     const x_actual = x + this.margin.left;
     const y_actual = y + this.margin.bottom;
 
     this.commands.push("q");
-    this.commands.push(`${width.toFixed(4)} 0 0 ${height.toFixed(4)} ${x_actual.toFixed(4)} ${y_actual.toFixed(4)} cm`);
+    this.commands.push(
+      `${width.toFixed(4)} 0 0 ${height.toFixed(4)} ${x_actual.toFixed(4)} ${y_actual.toFixed(4)} cm`,
+    );
     this.commands.push(`/${imageKey} Do`);
     this.commands.push("Q");
     this.updateStreamValue();
