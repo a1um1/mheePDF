@@ -167,7 +167,7 @@ export class Image implements Component {
     const { w: drawWidth, h: drawHeight } = this.getDimensions(width);
 
     // Page-break check
-    const pageHeight = writer.page.value.MediaBox[3];
+    const pageHeight = writer.getPageHeight();
     const printableHeight = pageHeight - writer.margin.top - writer.margin.bottom;
     if (availableHeight < printableHeight - 5 && drawHeight > availableHeight) {
       return this;

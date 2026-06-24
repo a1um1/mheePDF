@@ -1,13 +1,58 @@
 {
   "name": "mheepdf",
-  "module": "index.ts",
+  "version": "0.0.1",
+  "description": "TypeScript PDF generation library with Thai language support, custom fonts, images, tables, encryption, and compression",
+  "keywords": [
+    "pdf",
+    "pdf-generator",
+    "pdf-builder",
+    "thai",
+    "thai-pdf",
+    "typescript",
+    "table",
+    "image",
+    "encryption",
+    "compression",
+    "harfbuzz",
+    "font"
+  ],
+  "author": "a1um1",
+  "license": "MIT",
+  "homepage": "https://github.com/a1um1/MheePDF#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/a1um1/MheePDF.git"
+  },
+  "bugs": {
+    "url": "https://github.com/a1um1/MheePDF/issues"
+  },
   "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "bun run build.ts",
+    "test": "bun test",
+    "prepublishOnly": "bun run build && bun test"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/opentype.js": "^1.3.10",
-    "@types/pngjs": "^6.0.5"
-  },
-  "peerDependencies": {
+    "@types/pngjs": "^6.0.5",
     "typescript": "^5"
   },
   "dependencies": {

@@ -286,7 +286,7 @@ export class Table implements Component {
   }
 
   private resolveColumnWidths(totalWidth: number): number[] {
-    const widths = Array.from({ length: this.columns.length }).fill(0);
+    const widths: number[] = new Array<number>(this.columns.length).fill(0);
     let absoluteSum = 0;
     let starShares = 0;
 

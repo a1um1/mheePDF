@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./dist",
+    "moduleResolution": "bundler",
+    "module": "esnext",
+    "allowImportingTsExtensions": false,
+    "skipLibCheck": true,
+    "noUncheckedIndexedAccess": false,
+    "strict": false
+  },
+  "include": ["src/**/*.ts", "index.ts"],
+  "exclude": ["test/**/*.ts", "node_modules", "dist"]
+}

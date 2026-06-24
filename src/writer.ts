@@ -13,6 +13,11 @@ export class PDFPageWriter {
   public contentStream: PDFIndirectStreamObject;
   private commands: string[] = [];
 
+  /** Returns the page height in user units (from MediaBox). */
+  public getPageHeight(): number {
+    return this.page.value.MediaBox[3] as number;
+  }
+
   private currentFontKey?: string;
   private currentFontSize?: number;
   private activeFontObject: PDFType0FontObject | null = null;

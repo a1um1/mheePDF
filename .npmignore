@@ -1,0 +1,18 @@
+# Source (consumers get compiled dist/ only)
+src/
+index.ts
+build.ts
+
+# Tests and test resources
+test/
+
+# Config files
+tsconfig.json
+tsconfig.build.json
+bun.lock
+.vscode/
+docs/
+
+# Dev artifacts
+*.tsbuildinfo
+test-*.pdf
