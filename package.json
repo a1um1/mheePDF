@@ -49,13 +49,20 @@
     "test": "bun test",
     "prepublishOnly": "bun run build && bun test",
     "cleanPDF": "bash -c 'rm -rf test/*.pdf'",
-    "postversion": "git push && git push --tags"
+    "postversion": "git push && git push --tags",
+    "docs:dev": "vitepress dev docs",
+    "docs:generate-api": "typedoc && bun run scripts/clean-docs.ts",
+    "docs:build": "bun run docs:generate-api && vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/opentype.js": "^1.3.10",
     "@types/pngjs": "^6.0.5",
-    "typescript": "^5"
+    "typedoc": "^0.28.19",
+    "typedoc-plugin-markdown": "^4.12.0",
+    "typescript": "^5",
+    "vitepress": "^1.6.4"
   },
   "dependencies": {
     "@colordx/core": "^5.4.3",

@@ -102,6 +102,29 @@ pdf.add(table);
 			<img src="docs/resources/usage/table.png" width="100%" >
 		</td>
 	</tr>
+<tr>
+		<td>
 
-	
+```typescript
+// Basic Usage With Image
+pdf.addImage("image.jpg", {
+  align: "left",
+  width: 200,
+});
+
+pdf.addImage("transparency.png", {
+  align: "center",
+  width: 200,
+});
+
+pdf.addImage("testcard.svg", {
+  align: "right",
+  width: 200,
+});
+```
+</td>
+		<td>
+			<img src="docs/resources/usage/graphic.png" width="100%" >
+		</td>
+	</tr>
 </table>

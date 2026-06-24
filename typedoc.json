@@ -1,0 +1,23 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/index.ts"],
+  "out": "docs/api",
+  "plugin": ["typedoc-plugin-markdown"],
+  "readme": "none",
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "cleanOutputDir": true,
+  "githubPages": true,
+  "hideBreadcrumbs": true,
+  "skipErrorChecking": true,
+  "entryFileName": "index.md",
+  "propertiesFormat": "table",
+  "parametersFormat": "table",
+  "enumMembersFormat": "table",
+  "typeDeclarationFormat": "table",
+  "sourceLinkTemplate": "https://github.com/a1um1/mheePDF/blob/main/{path}#L{line}",
+  "hidePageHeader": true,
+  "pageTitleTemplates": {
+    "member": "{name}"
+  }
+}

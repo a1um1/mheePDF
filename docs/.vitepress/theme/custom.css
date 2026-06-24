@@ -1,0 +1,229 @@
+:root {
+  --vp-c-brand-1: #855b52;
+  --vp-c-brand-2: #a27267;
+  --vp-c-brand-3: #b07e73;
+  --vp-c-brand-soft: rgba(133, 91, 82, 0.12);
+  
+  /* Additional colors for tags/accents */
+  --vp-c-accent: #f2a258;
+}
+
+.dark {
+  --vp-c-brand-1: #f2a258;
+  --vp-c-brand-2: #df9148;
+  --vp-c-brand-3: #c97e3a;
+  --vp-c-brand-soft: rgba(242, 162, 88, 0.12);
+  
+  --vp-c-accent: #855b52;
+}
+
+/* Custom premium styling */
+.VPFeature {
+  border: 1px solid var(--vp-c-bg-soft) !important;
+  background-color: var(--vp-c-bg-soft) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  border-radius: 12px !important;
+}
+
+.VPFeature:hover {
+  border-color: var(--vp-c-brand-1) !important;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -10px rgba(133, 91, 82, 0.15);
+}
+
+.dark .VPFeature:hover {
+  box-shadow: 0 12px 24px -10px rgba(242, 162, 88, 0.2);
+}
+
+/* Add custom font/typography smooth rendering */
+body {
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Header Styling for API Pages */
+.vp-doc[class*="_api_"] > div {
+  position: relative;
+  padding-top: 2.5rem !important;
+}
+
+/* Make h1 display at the top (under the absolute badge/file path) */
+.vp-doc[class*="_api_"] > div > h1:first-of-type {
+  margin-top: 0 !important;
+  margin-bottom: 1.5rem !important;
+  border-top: none !important;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--vp-c-text-1);
+}
+
+/* Absolute position for the top-level "Defined in" paragraph (badges) */
+.vp-doc[class*="_api_"] .vp-api-defined-in-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0 !important;
+  font-size: 0 !important; /* Hide "Defined in: " text */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Style the link inside the top-level "Defined in" paragraph */
+.vp-doc[class*="_api_"] .vp-api-defined-in-top > a {
+  font-size: 0.9rem !important;
+  font-family: var(--vp-font-family-mono);
+  color: var(--vp-c-text-2) !important;
+  text-decoration: none !important;
+}
+
+.vp-doc[class*="_api_"] .vp-api-defined-in-top > a:hover {
+  color: var(--vp-c-brand-1) !important;
+  text-decoration: underline !important;
+}
+
+/* Add custom badges using CSS :before on the top-level paragraph based on container classes */
+
+/* Class Badge */
+.vp-doc[class*="_api_classes_"] .vp-api-defined-in-top::before {
+  content: "Class";
+  background-color: var(--vp-c-brand-soft);
+  color: var(--vp-c-brand-1);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-family: var(--vp-font-family-base);
+}
+
+/* Interface Badge */
+.vp-doc[class*="_api_interfaces_"] .vp-api-defined-in-top::before {
+  content: "Interface";
+  background-color: rgba(242, 162, 88, 0.15);
+  color: #df9148;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-family: var(--vp-font-family-base);
+}
+
+/* Function Badge */
+.vp-doc[class*="_api_functions_"] .vp-api-defined-in-top::before {
+  content: "Function";
+  background-color: rgba(52, 211, 153, 0.15);
+  color: #10b981;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-family: var(--vp-font-family-base);
+}
+
+/* Styling for member-level headings to align the inline Defined in link to the right */
+.vp-doc[class*="_api_"] h2,
+.vp-doc[class*="_api_"] h3,
+.vp-doc[class*="_api_"] h4 {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
+  width: 100% !important;
+}
+
+.vp-doc[class*="_api_"] .vp-api-defined-in-member-inline {
+  font-weight: normal !important;
+}
+
+.vp-doc[class*="_api_"] .vp-api-defined-in-member-inline > a {
+  font-size: 0.8rem !important;
+  font-family: var(--vp-font-family-mono) !important;
+  color: var(--vp-c-text-2) !important;
+  text-decoration: none !important;
+  background-color: var(--vp-c-bg-soft) !important;
+  padding: 3px 8px !important;
+  border-radius: 4px !important;
+  border: 1px solid var(--vp-c-divider) !important;
+  transition: all 0.2s ease !important;
+}
+
+.vp-doc[class*="_api_"] .vp-api-defined-in-member-inline > a:hover {
+  background-color: var(--vp-c-brand-soft) !important;
+  border-color: var(--vp-c-brand-1) !important;
+  color: var(--vp-c-brand-1) !important;
+}
+
+/* Remove all horizontal rules in API pages */
+.vp-doc[class*="_api_"] hr {
+  display: none !important;
+}
+
+/* Remove default border-top divider and fix spacing on h2 headings */
+.vp-doc h2 {
+  border-top: none !important;
+  padding-top: 0rem !important;
+  margin-top: 1rem !important;
+}
+
+/* Premium Table Styling for API Pages */
+.vp-doc[class*="_api_"] table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+  display: block;
+  border: none !important;
+}
+
+.vp-doc[class*="_api_"] th {
+  background-color: var(--vp-c-bg-soft) !important;
+  color: var(--vp-c-text-1) !important;
+  font-weight: 600 !important;
+  text-align: left !important;
+  border-bottom: 2px solid var(--vp-c-divider) !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  padding: 10px 16px !important;
+}
+
+.vp-doc[class*="_api_"] td {
+  border-bottom: 1px solid var(--vp-c-divider) !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  padding: 12px 16px !important;
+  vertical-align: top !important;
+}
+
+.vp-doc[class*="_api_"] tr {
+  background-color: transparent !important;
+  transition: background-color 0.2s ease;
+}
+
+.vp-doc[class*="_api_"] tr:hover {
+  background-color: var(--vp-c-bg-soft) !important;
+}
+
+/* Stylized block for multiline types (pretty JSON/TS structure) */
+.vp-doc[class*="_api_"] .vp-api-type-block {
+  display: block !important;
+  white-space: pre !important;
+  text-align: left !important;
+  font-size: 0.85em !important;
+  padding: 8px 12px !important;
+  background: var(--vp-c-bg-alt) !important;
+  border-radius: 6px !important;
+  border: 1px solid var(--vp-c-divider) !important;
+  line-height: 1.5 !important;
+  font-family: var(--vp-font-family-mono) !important;
+  color: var(--vp-c-brand-1) !important;
+  margin: 4px 0 !important;
+  max-width: fit-content;
+}
+
