@@ -50,9 +50,10 @@
     "prepublishOnly": "bun run build && bun test",
     "cleanPDF": "bash -c 'rm -rf test/*.pdf'",
     "postversion": "git push && git push --tags",
-    "docs:dev": "vitepress dev docs",
+    "docs:dev": "bun run docs:generate-examples && vitepress dev docs",
+    "docs:generate-examples": "bun run scripts/generate-examples.ts",
     "docs:generate-api": "typedoc && bun run scripts/clean-docs.ts",
-    "docs:build": "bun run docs:generate-api && vitepress build docs",
+    "docs:build": "bun run docs:generate-examples && bun run docs:generate-api && vitepress build docs",
     "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {

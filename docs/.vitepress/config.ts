@@ -1,15 +1,17 @@
-import { defineConfig } from 'vitepress'
+import { defineConfig } from "vitepress";
 
 export default defineConfig({
   title: "MheePDF",
-  description: "TypeScript PDF generation library with Thai language support, custom fonts, images, tables, encryption, and compression",
+  description:
+    "TypeScript PDF generation library with Thai language support, custom fonts, images, tables, encryption, and compression",
   base: "/mheePDF/",
   themeConfig: {
     logo: "/resources/logo.svg",
     nav: [
       { text: "Home", link: "/" },
       { text: "Guide", link: "/guide/" },
-      { text: "API Reference", link: "/api/" }
+      { text: "Examples", link: "/guide/examples/basic" },
+      { text: "API Reference", link: "/api/" },
     ],
     sidebar: {
       "/guide/": [
@@ -19,16 +21,24 @@ export default defineConfig({
             { text: "Introduction", link: "/guide/" },
             { text: "Thai Font Support", link: "/guide/thai" },
             { text: "Tables", link: "/guide/tables" },
-            { text: "Images", link: "/guide/images" }
-          ]
-        }
+            { text: "Images", link: "/guide/images" },
+          ],
+        },
+        {
+          text: "Examples",
+          items: [
+            { text: "Basic Hello World", link: "/guide/examples/basic" },
+            { text: "Thai Language Support", link: "/guide/examples/thai" },
+            { text: "Table Grid & Styling", link: "/guide/examples/table" },
+            { text: "Images & SVG Vectors", link: "/guide/examples/image" },
+            { text: "Professional Invoice", link: "/guide/examples/invoice" },
+          ],
+        },
       ],
       "/api/": [
         {
           text: "API Reference",
-          items: [
-            { text: "Overview", link: "/api/" }
-          ]
+          items: [{ text: "Overview", link: "/api/" }],
         },
         {
           text: "Core Classes",
@@ -37,8 +47,8 @@ export default defineConfig({
             { text: "Table", link: "/api/classes/Table" },
             { text: "Text", link: "/api/classes/Text" },
             { text: "Image", link: "/api/classes/Image" },
-            { text: "Color", link: "/api/classes/Color" }
-          ]
+            { text: "Color", link: "/api/classes/Color" },
+          ],
         },
         {
           text: "PDF Objects & Low Level",
@@ -53,25 +63,23 @@ export default defineConfig({
             { text: "PDFIndirectStreamObject", link: "/api/classes/PDFIndirectStreamObject" },
             { text: "PDFInfoObject", link: "/api/classes/PDFInfoObject" },
             { text: "PDFPageObject", link: "/api/classes/PDFPageObject" },
-            { text: "PDFPagesObject", link: "/api/classes/PDFPagesObject" }
-          ]
+            { text: "PDFPagesObject", link: "/api/classes/PDFPagesObject" },
+          ],
         },
         {
           text: "Interfaces & Utilities",
           items: [
             { text: "Component", link: "/api/interfaces/Component" },
             { text: "LayoutContext", link: "/api/interfaces/LayoutContext" },
-            { text: "serialize", link: "/api/functions/serialize" }
-          ]
-        }
-      ]
+            { text: "serialize", link: "/api/functions/serialize" },
+          ],
+        },
+      ],
     },
-    socialLinks: [
-      { icon: "github", link: "https://github.com/a1um1/mheePDF" }
-    ],
+    socialLinks: [{ icon: "github", link: "https://github.com/a1um1/mheePDF" }],
     footer: {
       message: "Released under the MIT License.",
-      copyright: "Copyright © 2026-present a1um1"
-    }
-  }
-})
+      copyright: "Copyright © 2026-present a1um1",
+    },
+  },
+});

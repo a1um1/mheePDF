@@ -39,3 +39,4 @@ fonts/*
 
 docs/.vitepress/cache
 docs/api
+docs/guide/examples/*
