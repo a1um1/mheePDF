@@ -12,6 +12,7 @@ test("Image Module: JPEG, transparent PNG, SVG vector graphics and alignment", a
     margin: 40,
     defaultFont: font,
     fonts: [font],
+    compress: false,
   });
 
   doc.addText("JPEG Image Left-aligned", { fontSize: 12 });
@@ -27,8 +28,9 @@ test("Image Module: JPEG, transparent PNG, SVG vector graphics and alignment", a
   const svgString = readFileSync("test/resources/images/test-svg.svg");
   doc.addImage(svgString, { width: 150, align: "center" });
 
-  const content = doc.generate();
-  await write("test/test-image-gen.pdf", content);
+  const contentBuf = doc.generate();
+  await write("test/test-image-gen.pdf", contentBuf);
+  const content = contentBuf.toString("binary");
 
   expect(content).toContain("%PDF-1.4");
   // verify JPEG decoding format exists

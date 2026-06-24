@@ -71,9 +71,8 @@ export class Text implements Component {
       this.charSpacing !== undefined ? this.charSpacing : context.defaultCharSpacing || 0;
     const lh = this.getLineHeight(size, context);
 
-    if (font) {
-      writer.setFont(font, size);
-    }
+    const effectiveFont = font ?? "Helvetica";
+    writer.setFont(effectiveFont, size);
 
     const lines = this.wrapText(this.text, width, font, size, context, charSpacing);
     const isSnug = (context as any).snug;

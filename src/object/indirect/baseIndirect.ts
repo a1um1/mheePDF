@@ -22,6 +22,29 @@ export class PDFIndirectBaseObject {
     return `${this.id} ${this.generation} obj\n${serialize(this.value)}\nendobj`;
   }
 
+  toBuffer(
+    encryptFn?: (str: string) => string,
+    encryptStreamFn?: (data: Buffer) => Buffer,
+    compressOverride?: boolean,
+  ): Buffer {
+    if (this.id === undefined || this.generation === undefined) {
+      if (this.value && typeof this.value.toBuffer === "function") {
+        return this.value.toBuffer(encryptStreamFn, compressOverride);
+      }
+      return Buffer.from(serialize(this.value, 0, encryptFn));
+    }
+
+    if (this.value && typeof this.value.toBuffer === "function") {
+      const streamBuf = this.value.toBuffer(encryptStreamFn, compressOverride);
+      const prefix = Buffer.from(`${this.id} ${this.generation} obj\n`);
+      const suffix = Buffer.from("\nendobj");
+      return Buffer.concat([prefix, streamBuf, suffix]);
+    }
+
+    const contentStr = serialize(this.value, 0, encryptFn);
+    return Buffer.from(`${this.id} ${this.generation} obj\n${contentStr}\nendobj`);
+  }
+
   getChildren(): (PDFIndirectBaseObject | undefined)[] {
     return [];
   }

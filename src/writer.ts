@@ -5,6 +5,7 @@ import { PDFFontObject } from "./object/indirect/font";
 import { Color } from "./color";
 import * as hb from "harfbuzzjs";
 import type { PDFEngine } from "./engine";
+import { escapePDFString } from "./object/serialize";
 
 export class PDFPageWriter {
   public pdf: PDFEngine;
@@ -151,7 +152,7 @@ export class PDFPageWriter {
       );
       textStr = commands;
     } else {
-      textStr = `(${text}) Tj`;
+      textStr = `(${escapePDFString(text)}) Tj`;
     }
 
     this.commands.push("q"); // Push graphics state to localize color and opacity

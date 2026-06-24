@@ -8,6 +8,22 @@ import type { Component, LayoutContext } from "./layout";
 import { Text, type TextOptions } from "./components/text";
 import { Image, type ImageOptions } from "./components/image";
 import { Table } from "./components/table";
+import { PDFInfoObject } from "./object/indirect/info";
+import { PDFEncryptObject } from "./object/indirect/encrypt";
+
+import { randomBytes } from "crypto";
+import { computeOValue, computeEncryptionKey, computeUValue } from "./crypto";
+
+export interface PDFEncryptionOptions {
+  userPassword?: string;
+  ownerPassword?: string;
+  permissions?: {
+    print?: "none" | "low" | "high";
+    modify?: boolean;
+    copy?: boolean;
+    annot?: boolean;
+  };
+}
 
 export interface MheePDFOptions {
   pageSize?: [number, number | "auto"];
@@ -19,6 +35,18 @@ export interface MheePDFOptions {
   defaultTablePadding?: number | { top?: number; bottom?: number; left?: number; right?: number };
   fonts?: PDFType0FontObject[];
   maxPageHeight?: number;
+  compress?: boolean;
+  info?: {
+    title?: string;
+    author?: string;
+    subject?: string;
+    keywords?: string;
+    creator?: string;
+    producer?: string;
+    creationDate?: Date;
+    modDate?: Date;
+  };
+  encrypt?: PDFEncryptionOptions;
 }
 
 export class MheePDF {
@@ -32,6 +60,10 @@ export class MheePDF {
 
   constructor(options?: MheePDFOptions) {
     this.options = options || {};
+    
+    // Configure stream compression on this engine instance (not global)
+    this.pdf.compress = this.options.compress !== false;
+
     if (this.options.defaultFont && this.options.defaultFont instanceof PDFType0FontObject) {
       this.pdf.addObject(this.options.defaultFont);
     }
@@ -39,6 +71,63 @@ export class MheePDF {
       for (const font of this.options.fonts) {
         this.pdf.addObject(font);
       }
+    }
+
+    // Configure document metadata Info object
+    if (this.options.info) {
+      const infoObj = new PDFInfoObject({
+        info: {
+          Title: this.options.info.title,
+          Author: this.options.info.author,
+          Subject: this.options.info.subject,
+          Keywords: this.options.info.keywords,
+          Creator: this.options.info.creator,
+          Producer: this.options.info.producer,
+          CreationDate: this.options.info.creationDate,
+          ModDate: this.options.info.modDate,
+        },
+      });
+      this.pdf.infoObject = this.pdf.addObject(infoObj);
+    }
+
+    // Configure document encryption/security
+    if (this.options.encrypt) {
+      const documentId = randomBytes(16);
+      this.pdf.documentId = documentId;
+
+      let p = -4; // All permissions allowed by default
+      if (this.options.encrypt.permissions) {
+        const perm = this.options.encrypt.permissions;
+        let val = 0xfffffffc;
+        if (perm.print === "none") {
+          val &= ~(1 << 2);
+        }
+        if (perm.modify === false) {
+          val &= ~(1 << 3);
+        }
+        if (perm.copy === false) {
+          val &= ~(1 << 4);
+        }
+        if (perm.annot === false) {
+          val &= ~(1 << 5);
+        }
+        p = val;
+      }
+
+      const userPwd = this.options.encrypt.userPassword || "";
+      const ownerPwd = this.options.encrypt.ownerPassword || "";
+      const oValue = computeOValue(userPwd, ownerPwd);
+      const encKey = computeEncryptionKey(userPwd, oValue, p, documentId);
+      const uValue = computeUValue(encKey, documentId);
+
+      this.pdf.encryptionKey = encKey;
+
+      const encryptObj = new PDFEncryptObject({
+        O: oValue,
+        U: uValue,
+        P: p,
+      });
+      this.pdf.encryptObject = this.pdf.addObject(encryptObj);
     }
   }
 
@@ -95,14 +184,14 @@ export class MheePDF {
     return this;
   }
 
-  generate(): string {
+  generate(): Buffer {
     if (this.components.length > 0) {
       this.layoutComponents();
     }
     return this.pdf.generatePDFcontent();
   }
 
-  generatePDFcontent(): string {
+  generatePDFcontent(): Buffer {
     return this.generate();
   }
 

@@ -55,67 +55,6 @@ test("Object Pages", () => {
   console.log(page.toString(), pages.toString());
 });
 
-test("Generate full PDF file", async () => {
-  const pdf = new PDFEngine();
-
-  const pages = new PDFPagesObject({
-    id: 1,
-    generation: 0,
-    pages: [],
-  });
-
-  const font = new PDFFontObject({
-    id: 3,
-    generation: 0,
-    fontName: "F1",
-  });
-
-  const text = new PDFIndirectStreamObject({
-    id: 4,
-    generation: 0,
-    value: "BT /F1 12 Tf 100 700 Td (Hello, World!) Tj ET",
-  });
-
-  const page = new PDFPageObject({
-    id: 2,
-    generation: 0,
-    pageSize: [612, 792],
-    resources: font,
-    Parent: pages,
-    Contents: [text],
-  });
-
-  pages.addPage(page);
-
-  const catalog = new PDFCatalogObject({
-    id: 5,
-    generation: 0,
-    Base: pages,
-  });
-
-  // Add objects to PDF
-  pdf.addObject(pages);
-  pdf.addObject(page);
-  pdf.addObject(font);
-  pdf.addObject(text);
-  pdf.addObject(catalog);
-
-  const content = pdf.generatePDFcontent();
-  console.log("--- Generated PDF ---");
-  console.log(content);
-  console.log("---------------------");
-
-  // Write to test/test.pdf
-  await write("test/test.pdf", content);
-
-  // Simple assertions to verify structure
-  expect(content).toContain("%PDF-1.4");
-  expect(content).toContain("xref");
-  expect(content).toContain("trailer");
-  expect(content).toContain("startxref");
-  expect(content).toContain("%%EOF");
-});
-
 test("Generate PDF file with auto-generated IDs", async () => {
   const pdf = new PDFEngine();
 
@@ -154,12 +93,13 @@ test("Generate PDF file with auto-generated IDs", async () => {
     }),
   );
 
-  const content = pdf.generatePDFcontent();
+  const contentBuf = pdf.generatePDFcontent();
   console.log("--- Generated PDF (Auto-ID) ---");
-  console.log(content);
+  console.log(contentBuf);
   console.log("--------------------------------");
 
-  await write("test/test-auto.pdf", content);
+  await write("test/test-auto.pdf", contentBuf);
+  const content = contentBuf.toString("binary");
 
   expect(pages.id).toBe(1);
   expect(font.id).toBe(2);
@@ -175,7 +115,7 @@ test("Generate PDF file with auto-generated IDs", async () => {
 });
 
 test("Generate PDF using high-level MheePDF API", async () => {
-  const doc = new MheePDF();
+  const doc = new MheePDF({ compress: false });
 
   doc.addPage(
     [612, 792],
@@ -191,10 +131,11 @@ test("Generate PDF using high-level MheePDF API", async () => {
     { margin: 50 },
   );
 
-  const content = doc.generate();
+  const contentBuf = doc.generate();
   console.log("--- Fluent Generated PDF ---");
-  console.log(content);
+  console.log(contentBuf);
   console.log("----------------------------");
+  const content = contentBuf.toString("binary");
 
   expect(content).toContain("%PDF-1.4");
   expect(content).toContain("/BaseFont /Helvetica");

@@ -8,6 +8,8 @@ export { PDFPageObject } from "./object/indirect/page";
 export { PDFPagesObject } from "./object/indirect/pages";
 export { PDFIndirectStreamObject } from "./object/indirect/stream";
 export { PDFType0FontObject } from "./object/indirect/fontType0";
+export { PDFInfoObject } from "./object/indirect/info";
+export { PDFEncryptObject } from "./object/indirect/encrypt";
 export { PDFPageWriter } from "./writer";
 export { Text } from "./components/text";
 export { Table } from "./components/table";

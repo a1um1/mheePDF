@@ -14,6 +14,7 @@ test("Text Module: alignments, line heights, character spacing, wrapping, and Th
     fonts: [font],
     defaultCharSpacing: 1.5,
     defaultLineHeight: 20,
+    compress: false,
   });
 
   // Test alignment options
@@ -33,8 +34,9 @@ test("Text Module: alignments, line heights, character spacing, wrapping, and Th
     { fontSize: 12 },
   );
 
-  const content = doc.generate();
-  await write("test/test-text-gen.pdf", content);
+  const contentBuf = doc.generate();
+  await write("test/test-text-gen.pdf", contentBuf);
+  const content = contentBuf.toString("binary");
 
   expect(content).toContain("%PDF-1.4");
   expect(content).toContain("xref");

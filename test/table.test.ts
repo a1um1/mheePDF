@@ -1,7 +1,6 @@
 import { expect, test } from "bun:test";
 import { write } from "bun";
-import { MheePDF, PDFType0FontObject, Table, Text, Color } from "../src";
-import { readFileSync } from "fs";
+import { MheePDF, Table, Text } from "../src";
 
 test("Table Module: structure, styling, columns alignment and cell padding", async () => {
   const doc = new MheePDF({
@@ -9,17 +8,18 @@ test("Table Module: structure, styling, columns alignment and cell padding", asy
     margin: 40,
     defaultFont: "Helvetica",
     defaultTablePadding: 8,
+    compress: false,
   });
 
   const table = new Table({
-    columns: [60, "*", "2*"], // absolute, star, and proportional star columns
+    columns: [60, "*", "2*"],
     borderWidth: 1.5,
     borderColor: "#4b5563",
     backgroundColor: "#ffffff",
     headerBackgroundColor: "#3b82f6",
     alternateRowBackgroundColor: "#eff6ff",
     aligns: ["center", "left", "right"],
-    padding: { top: 4, bottom: 4, left: 10, right: 10 }, // asymmetric padding
+    padding: { top: 4, bottom: 4, left: 10, right: 10 },
   });
 
   table.addHeader([
@@ -39,16 +39,17 @@ test("Table Module: structure, styling, columns alignment and cell padding", asy
   doc.addText("Product List Table:", { fontSize: 14 });
   doc.add(table);
 
-  const content = doc.generate();
-  await write("test/test-table-gen.pdf", content);
+  const contentBuf = doc.generate();
+  await write("test/test-table-gen.pdf", contentBuf);
+  const content = contentBuf.toString("binary");
 
   expect(content).toContain("%PDF-1.4");
   expect(content).toContain("Product List Table:");
   expect(content).toContain("Item A");
-  expect(content).toContain("Item B (Alternate ");
-  expect(content).toContain("Row background)");
+  expect(content).toContain("Item B \\(Alternate ");
+  expect(content).toContain("Row background\\)");
   expect(content).toContain("Custom Yellow ");
   expect(content).toContain("Background Cell");
-  // verify cell border rendering commands exist
+
   expect(content).toContain("re");
 });

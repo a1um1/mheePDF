@@ -1,7 +1,6 @@
 import { expect, test } from "bun:test";
 import { write } from "bun";
-import { MheePDF, PDFType0FontObject, Table } from "../src";
-import { readFileSync } from "fs";
+import { MheePDF, Table } from "../src";
 
 test("Document Module: layout flow, auto-height receipts, and pagination", async () => {
   // Test 1: Single-Page Auto-Height Receipt
@@ -11,6 +10,7 @@ test("Document Module: layout flow, auto-height receipts, and pagination", async
     defaultFont: "Helvetica",
     defaultFontSize: 10,
     defaultLineHeight: 14,
+    compress: false,
   });
 
   docSingle.addText("MHEE CAFE", { fontSize: 14, align: "center" });
@@ -26,8 +26,9 @@ test("Document Module: layout flow, auto-height receipts, and pagination", async
   tableSingle.addRow(["Croissant", "2", "120.00"]);
   docSingle.add(tableSingle);
 
-  const contentSingle = docSingle.generate();
-  await write("test/test-receipt-single-gen.pdf", contentSingle);
+  const contentSingleBuf = docSingle.generate();
+  await write("test/test-receipt-single-gen.pdf", contentSingleBuf);
+  const contentSingle = contentSingleBuf.toString("binary");
 
   expect(contentSingle).toContain("%PDF-1.4");
   expect(contentSingle).toContain("MHEE CAFE");
@@ -42,6 +43,7 @@ test("Document Module: layout flow, auto-height receipts, and pagination", async
     defaultFont: "Helvetica",
     defaultFontSize: 10,
     defaultLineHeight: 14,
+    compress: false,
   });
 
   docMulti.addText("LARGE CATERING RECEIPT", { fontSize: 12, align: "center" });
@@ -58,8 +60,9 @@ test("Document Module: layout flow, auto-height receipts, and pagination", async
   }
   docMulti.add(tableMulti);
 
-  const contentMulti = docMulti.generate();
-  await write("test/test-receipt-multi-gen.pdf", contentMulti);
+  const contentMultiBuf = docMulti.generate();
+  await write("test/test-receipt-multi-gen.pdf", contentMultiBuf);
+  const contentMulti = contentMultiBuf.toString("binary");
 
   expect(contentMulti).toContain("%PDF-1.4");
   expect(contentMulti).toContain("LARGE CATERING RECEIPT");
@@ -73,6 +76,7 @@ test("Document Module: layout flow, auto-height receipts, and pagination", async
     defaultFont: "Helvetica",
     defaultFontSize: 10,
     defaultLineHeight: 14,
+    compress: false,
   });
 
   docVeryLong.addText("VERY LONG CATERING RECEIPT", { fontSize: 12, align: "center" });
@@ -89,8 +93,9 @@ test("Document Module: layout flow, auto-height receipts, and pagination", async
   }
   docVeryLong.add(tableVertyLong);
 
-  const contentVeryLong = docVeryLong.generate();
-  await write("test/test-receipt-very-long-gen.pdf", contentVeryLong);
+  const contentVeryLongBuf = docVeryLong.generate();
+  await write("test/test-receipt-very-long-gen.pdf", contentVeryLongBuf);
+  const contentVeryLong = contentVeryLongBuf.toString("binary");
 
   expect(contentVeryLong).toContain("%PDF-1.4");
   expect(contentVeryLong).toContain("VERY LONG CATERING RECEIPT");

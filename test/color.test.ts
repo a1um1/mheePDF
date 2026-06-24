@@ -1,13 +1,13 @@
 import { expect, test } from "bun:test";
 import { write } from "bun";
-import { MheePDF, PDFType0FontObject, Color } from "../src";
-import { readFileSync } from "fs";
+import { MheePDF, Color } from "../src";
 
 test("Color Module: parsing, conversion and transparency", async () => {
   const doc = new MheePDF({
     pageSize: MheePDF.A4,
     margin: 50,
     defaultFont: "Helvetica",
+    compress: false,
   });
 
   // Test static constructors and color conversions
@@ -43,8 +43,9 @@ test("Color Module: parsing, conversion and transparency", async () => {
   doc.addText("Oklab Text", { color: oklab, fontSize: 12 });
   doc.addText("Transparent Red Text (70% opacity)", { color: transparentColor, fontSize: 12 });
 
-  const content = doc.generate();
-  await write("test/test-color-gen.pdf", content);
+  const contentBuf = doc.generate();
+  await write("test/test-color-gen.pdf", contentBuf);
+  const content = contentBuf.toString("binary");
 
   expect(content).toContain("%PDF-1.4");
   expect(content).toContain("Hex Blue Title");
