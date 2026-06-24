@@ -1,6 +1,6 @@
 {
   "name": "mheepdf",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "TypeScript PDF generation library with Thai language support, custom fonts, images, tables, encryption, and compression",
   "keywords": [
     "pdf",
@@ -48,7 +48,7 @@
     "build": "bun run build.ts",
     "test": "bun test",
     "prepublishOnly": "bun run build && bun test",
-		"cleanPDF": "bash -c 'rm -rf test/*.pdf'"
+    "cleanPDF": "bash -c 'rm -rf test/*.pdf'"
   },
   "devDependencies": {
     "@types/bun": "latest",
