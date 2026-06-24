@@ -62,11 +62,45 @@ pdf.addText("จัดหน้าอัตโนมัติ เท่ไหม
 pdf.addText("\n");
 pdf.addText("เพื่อที่โลกาภิวัฒน์หรือ ...");
 ```
-> [!CAUTION]
-> Usage with Thai must include Thai font
 </td>
 		<td>
 			<img src="docs/resources/usage/thai.png" width="100%" >
 		</td>
 	</tr>
+	<tr>
+		<td colspan="2">
+			<p>Automatic handle Page Break</p>
+			<img src="docs/resources/usage/pageBreak.png" width="100%">
+
+> [!CAUTION]
+> Usage with Thai must include Thai font
+</td>
+</tr>
+	<tr>
+		<td>
+
+```typescript
+// Basic Usage With Table
+const table = new Table({
+  columns: [80, "2*", "*"],
+  aligns: ["center", "left", "right"],
+  borderWidth: 0.5,
+  borderColor: "#000",
+  backgroundColor: "#fff",
+  alternateRowBackgroundColor: "#eff6ff",
+});
+
+table.addHeader(["รหัสสินค้า", "ชื่ิอสินค้า", "ราคา"]);
+for (const item of sampleItems) {
+  table.addRow([item.code, item.name, item.price]);
+}
+pdf.add(table);
+```
+</td>
+		<td>
+			<img src="docs/resources/usage/table.png" width="100%" >
+		</td>
+	</tr>
+
+	
 </table>
