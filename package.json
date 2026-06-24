@@ -47,7 +47,8 @@
   "scripts": {
     "build": "bun run build.ts",
     "test": "bun test",
-    "prepublishOnly": "bun run build && bun test"
+    "prepublishOnly": "bun run build && bun test",
+		"cleanPDF": "bash -c 'rm -rf test/*.pdf'"
   },
   "devDependencies": {
     "@types/bun": "latest",

@@ -26,7 +26,7 @@ test("Image Module: JPEG, transparent PNG, SVG vector graphics and alignment", a
 
   doc.addText("SVG Vector Graphic (crisp shapes)", { fontSize: 12 });
   const svgString = readFileSync("test/resources/images/test-svg.svg");
-  doc.addImage(svgString, { width: 150, align: "center" });
+  doc.addImage(svgString, { align: "center" });
 
   const contentBuf = doc.generate();
   await write("test/test-image-gen.pdf", contentBuf);

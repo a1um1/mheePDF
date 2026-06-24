@@ -4,6 +4,7 @@ import { PDFType0FontObject } from "./object/indirect/fontType0";
 import { PDFFontObject } from "./object/indirect/font";
 import { Color } from "./color";
 import * as hb from "harfbuzzjs";
+import { getStandardFontTextWidth } from "./standardFonts";
 import type { PDFEngine } from "./engine";
 import { escapePDFString } from "./object/serialize";
 
@@ -233,8 +234,8 @@ export class PDFPageWriter {
       throw new Error("Font must be set using setFont() to calculate text width.");
     }
     if (!this.activeFontObject) {
-      // Standard font fallback: assume average width of 0.6 of font size per character
-      return text.length * this.currentFontSize * 0.6 + text.length * charSpacing;
+      const fontName = this.currentFontKey || "Helvetica";
+      return getStandardFontTextWidth(text, fontName, this.currentFontSize, charSpacing);
     }
     const { width } = getPDFTextCommands(text, this.activeFontObject, this.currentFontSize, charSpacing);
     return width;

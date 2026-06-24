@@ -46,8 +46,8 @@ test("Table Module: structure, styling, columns alignment and cell padding", asy
   expect(content).toContain("%PDF-1.4");
   expect(content).toContain("Product List Table:");
   expect(content).toContain("Item A");
-  expect(content).toContain("Item B \\(Alternate ");
-  expect(content).toContain("Row background\\)");
+  expect(content).toContain("Item B \\(Alternate Row ");
+  expect(content).toContain("background\\)");
   expect(content).toContain("Custom Yellow ");
   expect(content).toContain("Background Cell");
 

@@ -10,6 +10,7 @@ import { Image, type ImageOptions } from "./components/image";
 import { Table } from "./components/table";
 import { PDFInfoObject } from "./object/indirect/info";
 import { PDFEncryptObject } from "./object/indirect/encrypt";
+import { getStandardFontTextWidth } from "./standardFonts";
 
 import { randomBytes } from "crypto";
 import { computeOValue, computeEncryptionKey, computeUValue } from "./crypto";
@@ -60,7 +61,7 @@ export class MheePDF {
 
   constructor(options?: MheePDFOptions) {
     this.options = options || {};
-    
+
     // Configure stream compression on this engine instance (not global)
     this.pdf.compress = this.options.compress !== false;
 
@@ -233,7 +234,8 @@ export class MheePDF {
         if (activeFont instanceof PDFType0FontObject) {
           return getPDFTextCommands(text, activeFont, activeSize, charSpacing).width;
         }
-        return text.length * activeSize * 0.6 + text.length * charSpacing;
+        const fontName = typeof activeFont === "string" ? activeFont : "Helvetica";
+        return getStandardFontTextWidth(text, fontName, activeSize, charSpacing);
       },
     };
 
@@ -294,10 +296,7 @@ export class MheePDF {
             } else {
               // Split succeeded. Calculate height of drawn part
               let drawnHeight = measured.height - remainder.measure(contentWidth, context).height;
-              if (
-                component instanceof Table &&
-                component.repeatHeader
-              ) {
+              if (component instanceof Table && component.repeatHeader) {
                 drawnHeight += component.getHeaderHeight(contentWidth, context);
               }
               drawnHeight = Math.max(0, drawnHeight);
@@ -340,10 +339,7 @@ export class MheePDF {
                 drawnHeight = measured.height;
               } else {
                 drawnHeight = measured.height - remainder.measure(contentWidth, context).height;
-                if (
-                  component instanceof Table &&
-                  component.repeatHeader
-                ) {
+                if (component instanceof Table && component.repeatHeader) {
                   drawnHeight += component.getHeaderHeight(contentWidth, context);
                 }
                 drawnHeight = Math.max(0, drawnHeight);
