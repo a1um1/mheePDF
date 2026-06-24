@@ -1,8 +1,12 @@
-![Logo](/docs/resources/logo.svg)
+![Logo](/docs/resources/logo.svg | width=100)
+
 
 # MheePDF
 หมี PDF
-![Dependencies](https://shields.io)
+
+
+
+
 
 
 
