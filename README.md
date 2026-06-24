@@ -45,8 +45,8 @@ await Bun.write("test.pdf", pdf.generatePDFcontent());
 
 ```typescript
 // Basic Usage With Thai
-const fontBuffer = await Bun.file("./THSarabunNew.ttf").arrayBuffer();
-const sarabunFont = new PDFType0FontObject(Buffer.from(fontBuffer));
+const fontBuffer; // TTF font Buffer
+const sarabunFont = new PDFType0FontObject(fontBuffer);
 
 const pdf = new MheePDF({
   pageSize: MheePDF.A4,
