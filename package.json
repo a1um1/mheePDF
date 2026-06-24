@@ -1,6 +1,6 @@
 {
   "name": "mheepdf",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "TypeScript PDF generation library with Thai language support, custom fonts, images, tables, encryption, and compression",
   "keywords": [
     "pdf",
