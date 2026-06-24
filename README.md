@@ -1,4 +1,4 @@
-<img src="docs/resources/logo.svg" width="100" height="100">
+<img src="docs/public/resources/logo.svg" width="100" height="100">
 
 # MheePDF - หมี PDF
 [![Publish to npm](https://github.com/a1um1/mheePDF/actions/workflows/publish.yml/badge.svg)](https://github.com/a1um1/mheePDF/actions/workflows/publish.yml)
@@ -44,7 +44,7 @@ await Bun.write("test.pdf", pdf.generatePDFcontent());
 
 </td>
 		<td>
-			<img src="docs/resources/usage/basic.png" width="100%" >
+			<img src="docs/public/resources/usage/basic.png" width="100%" >
 		</td>
 	</tr>
 	<tr>
@@ -68,13 +68,13 @@ pdf.addText("เพื่อที่โลกาภิวัฒน์หรื�
 ```
 </td>
 		<td>
-			<img src="docs/resources/usage/thai.png" width="100%" >
+			<img src="docs/public/resources/usage/thai.png" width="100%" >
 		</td>
 	</tr>
 	<tr>
 		<td colspan="2">
 			<p>Automatic handle Page Break</p>
-			<img src="docs/resources/usage/pageBreak.png" width="100%">
+			<img src="docs/public/resources/usage/pageBreak.png" width="100%">
 </td>
 </tr>
 	<tr>
@@ -99,7 +99,7 @@ pdf.add(table);
 ```
 </td>
 		<td>
-			<img src="docs/resources/usage/table.png" width="100%" >
+			<img src="docs/public/resources/usage/table.png" width="100%" >
 		</td>
 	</tr>
 <tr>
@@ -124,7 +124,7 @@ pdf.addImage("testcard.svg", {
 ```
 </td>
 		<td>
-			<img src="docs/resources/usage/graphic.png" width="100%" >
+			<img src="docs/public/resources/usage/graphic.png" width="100%" >
 		</td>
 	</tr>
 </table>
