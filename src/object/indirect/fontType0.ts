@@ -29,13 +29,18 @@ export class PDFType0FontObject extends PDFIndirectBaseObject {
     const font = opentype.parse(arrayBuffer);
 
     const postscriptName = (
-      font.names.postScriptName?.en ||
-      font.names.fontFamily?.en ||
+      (font.names as any).windows?.postScriptName?.en ||
+      (font.names as any).macintosh?.postScriptName?.en ||
+      (font.names as any).windows?.fontFamily?.en ||
+      (font.names as any).macintosh?.fontFamily?.en ||
       "CustomFont"
     ).replace(/\s+/g, "-");
 
     // ponytail: Reuse PDFIndirectStreamObject to represent the embedded font file hex stream
-    const fontFile = new PDFIndirectStreamObject({ value: fontBuffer });
+    const fontFile = new PDFIndirectStreamObject({
+      value: fontBuffer,
+      extraDict: { Length1: fontBuffer.length },
+    });
 
     // ponytail: Construct descriptor as direct PDFIndirectBaseObject using native types
     const scale = 1000 / font.unitsPerEm;
@@ -72,8 +77,8 @@ export class PDFType0FontObject extends PDFIndirectBaseObject {
         Subtype: "/CIDFontType2",
         BaseFont: `/${postscriptName}`,
         CIDSystemInfo: {
-          Registry: "/Adobe",
-          Ordering: "/Identity",
+          Registry: "Adobe",
+          Ordering: "Identity",
           Supplement: 0,
         },
         FontDescriptor: fontDescriptor.toRef(),
