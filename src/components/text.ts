@@ -88,7 +88,14 @@ export class Text implements Component {
     const linesToDraw = lines.slice(0, maxLines);
     const remainingLines = lines.slice(maxLines);
 
-    let currentY = y - size; // Position the first baseline at (y - size)
+    let capHeight = size * 0.7;
+    if (font && typeof font !== "string" && "font" in font) {
+      const otFont = (font as any).font;
+      const rawCap = otFont.tables.os2?.sCapHeight || otFont.ascender || (otFont.unitsPerEm * 0.7);
+      capHeight = (rawCap / otFont.unitsPerEm) * size;
+    }
+    const boxHeight = isSnug ? size : lh;
+    let currentY = y - (boxHeight + capHeight) / 2; // Position the first baseline to center the text visually
     for (const line of linesToDraw) {
       let xShift = 0;
       if (this.align === "center" || this.align === "right") {

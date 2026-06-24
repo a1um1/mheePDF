@@ -53,3 +53,34 @@ test("Table Module: structure, styling, columns alignment and cell padding", asy
 
   expect(content).toContain("re");
 });
+
+test("Table vertical alignment (valign) features and defaults", () => {
+  const doc = new MheePDF({
+    pageSize: MheePDF.A4,
+    margin: 40,
+    defaultFont: "Helvetica",
+    compress: false,
+  });
+
+  const table = new Table({
+    columns: ["*", "*", "*"],
+    valign: "bottom", // Table-wide default
+    valigns: ["top", "middle", "bottom"], // Column-specific defaults
+  });
+
+  table.addRow([
+    "Col 1 (top)", // string value -> TableCell with top
+    { content: "Col 2 (middle)" }, // object -> TableCell with middle
+    { content: "Col 3 (bottom)", valign: "top" }, // cell-specific override to top
+  ]);
+
+  doc.add(table);
+  const contentBuf = doc.generate();
+  const content = contentBuf.toString("binary");
+
+  expect(content).toContain("%PDF-1.4");
+  expect(content).toContain("Col 1 \\(top\\)");
+  expect(content).toContain("Col 2 \\(middle\\)");
+  expect(content).toContain("Col 3 \\(bottom\\)");
+});
+

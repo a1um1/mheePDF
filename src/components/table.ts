@@ -8,15 +8,24 @@ export type CellContent =
   | string
   | number
   | TableCell
-  | { content: Component | string | number | TableCell; backgroundColor?: string | Color };
+  | {
+      content: Component | string | number | TableCell;
+      backgroundColor?: string | Color;
+      valign?: "top" | "middle" | "bottom";
+    };
 
 export class TableCell implements Component {
   public content: Component;
   public backgroundColor?: string | Color;
+  public valign?: "top" | "middle" | "bottom";
 
-  constructor(content: Component, options?: { backgroundColor?: string | Color }) {
+  constructor(
+    content: Component,
+    options?: { backgroundColor?: string | Color; valign?: "top" | "middle" | "bottom" },
+  ) {
     this.content = content;
     this.backgroundColor = options?.backgroundColor;
+    this.valign = options?.valign;
   }
 
   measure(width: number, context: LayoutContext): { width: number; height: number } {
@@ -31,9 +40,22 @@ export class TableCell implements Component {
     availableHeight: number,
     context: LayoutContext,
   ): Component | null {
-    const remainder = this.content.draw(writer, x, y, width, availableHeight, context);
+    const measured = this.content.measure(width, context);
+    const contentHeight = measured.height;
+
+    let drawY = y;
+    if (availableHeight > contentHeight) {
+      const diff = availableHeight - contentHeight;
+      if (this.valign === "middle") {
+        drawY = y - diff / 2;
+      } else if (this.valign === "bottom") {
+        drawY = y - diff;
+      }
+    }
+
+    const remainder = this.content.draw(writer, x, drawY, width, availableHeight, context);
     if (remainder) {
-      return new TableCell(remainder, { backgroundColor: this.backgroundColor });
+      return new TableCell(remainder, { backgroundColor: this.backgroundColor, valign: this.valign });
     }
     return null;
   }
@@ -51,6 +73,8 @@ export class Table implements Component {
   public padding?: number | { top?: number; bottom?: number; left?: number; right?: number };
   public repeatHeader: boolean;
   public aligns?: ("left" | "center" | "right")[];
+  public valign?: "top" | "middle" | "bottom";
+  public valigns?: ("top" | "middle" | "bottom")[];
 
   constructor(options: {
     columns: (number | string)[];
@@ -62,6 +86,8 @@ export class Table implements Component {
     padding?: number | { top?: number; bottom?: number; left?: number; right?: number };
     repeatHeader?: boolean;
     aligns?: ("left" | "center" | "right")[];
+    valign?: "top" | "middle" | "bottom";
+    valigns?: ("top" | "middle" | "bottom")[];
   }) {
     this.columns = options.columns;
     this.borderWidth = options.borderWidth ?? 1;
@@ -72,6 +98,8 @@ export class Table implements Component {
     this.repeatHeader = options.repeatHeader ?? true;
     this.padding = options.padding;
     this.aligns = options.aligns;
+    this.valign = options.valign ?? "middle";
+    this.valigns = options.valigns;
   }
 
   private getPadding(context: LayoutContext): {
@@ -278,6 +306,8 @@ export class Table implements Component {
         padding: this.padding,
         repeatHeader: this.repeatHeader,
         aligns: this.aligns,
+        valign: this.valign,
+        valigns: this.valigns,
       });
 
       if (this.repeatHeader) {
@@ -331,15 +361,20 @@ export class Table implements Component {
 
   private getCellComponent(cell: CellContent, colIdx: number): TableCell {
     if (cell instanceof TableCell) {
+      if (cell.valign === undefined) {
+        cell.valign = this.valigns?.[colIdx] ?? this.valign;
+      }
       return cell;
     }
 
     if (cell && typeof cell === "object" && "content" in cell) {
       const innerComp = this.toComponent(cell.content, colIdx);
-      return new TableCell(innerComp, { backgroundColor: cell.backgroundColor });
+      const valign = ("valign" in cell ? cell.valign : undefined) ?? this.valigns?.[colIdx] ?? this.valign;
+      return new TableCell(innerComp, { backgroundColor: cell.backgroundColor, valign });
     }
 
-    return new TableCell(this.toComponent(cell, colIdx));
+    const valign = this.valigns?.[colIdx] ?? this.valign;
+    return new TableCell(this.toComponent(cell, colIdx), { valign });
   }
 
   private toComponent(val: any, colIdx: number): Component {
