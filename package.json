@@ -48,7 +48,8 @@
     "build": "bun run build.ts",
     "test": "bun test",
     "prepublishOnly": "bun run build && bun test",
-    "cleanPDF": "bash -c 'rm -rf test/*.pdf'"
+    "cleanPDF": "bash -c 'rm -rf test/*.pdf'",
+    "postversion": "git push && git push --tags"
   },
   "devDependencies": {
     "@types/bun": "latest",
