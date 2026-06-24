@@ -65,7 +65,7 @@ export class Table implements Component {
   }) {
     this.columns = options.columns;
     this.borderWidth = options.borderWidth ?? 1;
-    this.borderColor = options.borderColor ?? "0 G"; // Default to black stroke
+    this.borderColor = options.borderColor ?? Color.rgb(0, 0, 0, 0); // Default to black stroke
     this.backgroundColor = options.backgroundColor;
     this.headerBackgroundColor = options.headerBackgroundColor;
     this.alternateRowBackgroundColor = options.alternateRowBackgroundColor;
@@ -107,7 +107,12 @@ export class Table implements Component {
     return this;
   }
 
-  private getRowHeight(row: TableCell[], colWidths: number[], padding: any, cellContext: any): number {
+  private getRowHeight(
+    row: TableCell[],
+    colWidths: number[],
+    padding: any,
+    cellContext: any,
+  ): number {
     let maxCellHeight = 0;
     for (let i = 0; i < row.length; i++) {
       const cell = row[i]!;
