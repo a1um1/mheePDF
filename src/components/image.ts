@@ -1,10 +1,23 @@
-import { readFileSync, existsSync } from "fs";
-import { deflateSync } from "zlib";
+import { Buffer } from "buffer";
+import { deflateSync } from "fflate";
 import { PNG } from "pngjs";
-import { Resvg } from "@resvg/resvg-js";
 import type { Component, LayoutContext } from "../layout";
 import type { PDFPageWriter } from "../writer";
 import { PDFIndirectStreamObject } from "../object/indirect/stream";
+import { ensureBuffer } from "../utils";
+
+let fs: any = null;
+let ResvgClass: any = null;
+
+if (typeof window === "undefined") {
+  try {
+    fs = await import(/* @vite-ignore */ "fs");
+  } catch (e) {}
+  try {
+    const resvgModule = await import(/* @vite-ignore */ "@resvg/resvg-js");
+    ResvgClass = resvgModule.Resvg;
+  } catch (e) {}
+}
 
 export type ImageOptions = {
   width?: number;
@@ -13,7 +26,7 @@ export type ImageOptions = {
 };
 
 export class Image implements Component {
-  public source: string | Buffer;
+  public source: any;
   public width?: number;
   public height?: number;
   public align?: "left" | "center" | "right";
@@ -26,7 +39,7 @@ export class Image implements Component {
   // Cached XObject reference for raster images (JPEG/PNG) to avoid duplicate PDF objects
   private cachedXObjectRef: any = null;
 
-  constructor(source: string | Buffer, options?: ImageOptions) {
+  constructor(source: any, options?: ImageOptions) {
     this.source = source;
     this.width = options?.width;
     this.height = options?.height;
@@ -43,16 +56,14 @@ export class Image implements Component {
       if (trimmed.startsWith("<svg") || trimmed.startsWith("<?xml") || trimmed.includes("<svg")) {
         this.buffer = Buffer.from(trimmed, "utf-8");
       } else {
-        if (existsSync(trimmed)) {
-          this.buffer = readFileSync(trimmed);
+        if (fs && fs.existsSync && fs.existsSync(trimmed)) {
+          this.buffer = Buffer.from(fs.readFileSync(trimmed));
         } else {
-          throw new Error(`File not found: ${trimmed}`);
+          throw new Error(`File not found or filesystem unavailable: ${trimmed}`);
         }
       }
-    } else if (this.source instanceof Buffer || this.source instanceof Uint8Array) {
-      this.buffer = Buffer.from(this.source);
     } else {
-      throw new Error("Invalid image source. Must be a file path, SVG string, or Buffer.");
+      this.buffer = ensureBuffer(this.source);
     }
 
     // Detect format
@@ -74,21 +85,26 @@ export class Image implements Component {
     } else {
       const text = this.buffer.toString("utf-8").trim();
       if (text.startsWith("<svg") || text.includes("<svg") || text.startsWith("<?xml")) {
-        const resvg = new Resvg(text);
+        if (!ResvgClass) {
+          throw new Error(
+            "SVG rendering requires '@resvg/resvg-js' to be installed and supported in your environment."
+          );
+        }
+        const resvg = new ResvgClass(text);
         const originalWidth = resvg.width;
         const originalHeight = resvg.height;
 
         // Render at 4x the original SVG size for crispness in PDF
         const scaleFactor = 4;
         const renderWidth = originalWidth * scaleFactor;
-        const rendered = new Resvg(text, {
+        const rendered = new ResvgClass(text, {
           fitTo: {
             mode: "width",
             value: renderWidth,
           },
         });
 
-        this.buffer = rendered.render().asPng();
+        this.buffer = Buffer.from(rendered.render().asPng());
         this.format = "png";
         this.imgWidth = originalWidth;
         this.imgHeight = originalHeight;
@@ -222,11 +238,11 @@ export class Image implements Component {
           }
         }
 
-        const compressedRGB = deflateSync(Buffer.from(rgbData));
+        const compressedRGB = Buffer.from(deflateSync(rgbData));
 
         let smaskRef: any = null;
         if (alphaData) {
-          const compressedAlpha = deflateSync(Buffer.from(alphaData));
+          const compressedAlpha = Buffer.from(deflateSync(alphaData));
           const smaskStream = writer.pdf.addObject(
             new PDFIndirectStreamObject({
               value: compressedAlpha,

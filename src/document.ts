@@ -13,7 +13,8 @@ import { PDFInfoObject } from "./object/indirect/info";
 import { PDFEncryptObject } from "./object/indirect/encrypt";
 import { getStandardFontTextWidth } from "./standardFonts";
 
-import { randomBytes } from "crypto";
+import { Buffer } from "buffer";
+import { randomBytes } from "./crypto";
 import { computeOValue, computeEncryptionKey, computeUValue } from "./crypto";
 
 export interface PDFEncryptionOptions {
@@ -50,7 +51,7 @@ export interface MheePDFOptions {
     modDate?: Date;
   };
   encrypt?: PDFEncryptionOptions;
-  backgroundImage?: string | Buffer;
+  backgroundImage?: string | Buffer | Uint8Array | ArrayBuffer | SharedArrayBuffer;
 }
 
 export class MheePDF<T = any> {
@@ -255,7 +256,10 @@ export class MheePDF<T = any> {
     return list;
   }
 
-  private layoutComponents(components: Component[], bgImageSource?: string | Buffer): void {
+  private layoutComponents(
+    components: Component[],
+    bgImageSource?: string | Buffer | Uint8Array | ArrayBuffer | SharedArrayBuffer,
+  ): void {
     const pageSize = this.options.pageSize || MheePDF.A4;
     const margin = this.options.margin ?? 50;
     const resolvedMargin =

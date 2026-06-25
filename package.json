@@ -68,6 +68,8 @@
   "dependencies": {
     "@colordx/core": "^5.4.3",
     "@resvg/resvg-js": "^2.6.2",
+    "buffer": "^6.0.3",
+    "fflate": "^0.8.2",
     "harfbuzzjs": "^1.4.0",
     "opentype.js": "^2.0.0",
     "pngjs": "^7.0.0"

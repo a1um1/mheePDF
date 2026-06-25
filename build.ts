@@ -21,7 +21,7 @@ const result = await Bun.build({
   entrypoints: ["./src/index.ts"],
   outdir: "./dist",
   format: "esm",
-  target: "node",
+  target: "browser",
   minify: false,
   sourcemap: "external",
   external,

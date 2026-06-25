@@ -2,6 +2,8 @@ import { PDFIndirectBaseObject } from "./baseIndirect";
 import { PDFIndirectStreamObject } from "./stream";
 import * as opentype from "opentype.js";
 import * as hb from "harfbuzzjs";
+import { Buffer } from "buffer";
+import { ensureBuffer } from "../../utils";
 
 export class PDFType0FontObject extends PDFIndirectBaseObject {
   override _type: string = "fontType0";
@@ -21,7 +23,8 @@ export class PDFType0FontObject extends PDFIndirectBaseObject {
     return [this.fontFile, this.fontDescriptor, this.cidFont, this.toUnicode];
   }
 
-  constructor(fontBuffer: Buffer) {
+  constructor(fontBufferInput: any) {
+    const fontBuffer = ensureBuffer(fontBufferInput);
     const arrayBuffer = fontBuffer.buffer.slice(
       fontBuffer.byteOffset,
       fontBuffer.byteOffset + fontBuffer.byteLength,
