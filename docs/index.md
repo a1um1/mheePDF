@@ -13,20 +13,20 @@ hero:
       text: Get Started
       link: /guide/
     - theme: alt
-      text: API Reference
-      link: /api/
+      text: Examples
+      link: /guide/examples/basic.md
 
 features:
-  - title: "🇹🇭 Thai Language Support"
+  - title: "Thai Language Support"
     details: "Built-in word shaping and glyph layout using HarfBuzz and custom TTF fonts for accurate Thai text representation."
-    icon: "💬"
-  - title: "📊 Table Support"
+    icon: "🇹🇭"
+  - title: "Table Support"
     details: "Draw clean, custom table components complete with headers, custom cell sizes, text alignment, and alternating row background colors."
-    icon: "📊"
-  - title: "🖼️ Image rendering"
+    icon: "📄"
+  - title: "Image rendering"
     details: "Embed PNG, JPEG, and SVG graphics easily into your document layouts."
     icon: "🖼️"
-  - title: "🛡️ Encryption & Compression"
+  - title: "Encryption & Compression"
     details: "Support document compression and standard PDF encryption/decryption properties."
     icon: "🛡️"
 ---
