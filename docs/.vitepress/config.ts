@@ -1,4 +1,44 @@
 import { defineConfig } from "vitepress";
+import { readdirSync, existsSync } from "fs";
+import { resolve, basename } from "path";
+
+const docsDir = resolve(__dirname, "..");
+
+/** Scan a docs/api/<subfolder> directory and return a sidebar group. */
+function apiSidebarGroup(subfolder: string) {
+  const dir = resolve(docsDir, "api", subfolder);
+  if (!existsSync(dir)) return null;
+
+  const files = readdirSync(dir)
+    .filter((f) => f.endsWith(".md"))
+    .sort();
+
+  if (files.length === 0) return null;
+
+  // "type-aliases" → "Type Aliases"
+  const label = subfolder
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+
+  return {
+    text: label,
+    items: files.map((f) => {
+      const name = basename(f, ".md");
+      return { text: name, link: `/api/${subfolder}/${name}` };
+    }),
+  };
+}
+
+const apiSubfolders = ["classes", "interfaces", "functions", "type-aliases"];
+
+const apiSidebar = [
+  {
+    text: "API Reference",
+    items: [{ text: "Overview", link: "/api/" }],
+  },
+  ...apiSubfolders.map(apiSidebarGroup).filter(Boolean),
+];
 
 export default defineConfig({
   title: "MheePDF",
@@ -22,6 +62,12 @@ export default defineConfig({
             { text: "Thai Font Support", link: "/guide/thai" },
             { text: "Tables", link: "/guide/tables" },
             { text: "Images", link: "/guide/images" },
+            { text: "Lines", link: "/guide/line" },
+            { text: "SVG Vector Graphics", link: "/guide/svg" },
+            { text: "Encryption & Security", link: "/guide/encryption" },
+            { text: "Templates & Loops", link: "/guide/templates" },
+            { text: "Page Options", link: "/guide/page-options" },
+            { text: "Document Metadata", link: "/guide/metadata" },
           ],
         },
         {
@@ -38,46 +84,7 @@ export default defineConfig({
           ],
         },
       ],
-      "/api/": [
-        {
-          text: "API Reference",
-          items: [{ text: "Overview", link: "/api/" }],
-        },
-        {
-          text: "Core Classes",
-          items: [
-            { text: "MheePDF", link: "/api/classes/MheePDF" },
-            { text: "Table", link: "/api/classes/Table" },
-            { text: "Text", link: "/api/classes/Text" },
-            { text: "Image", link: "/api/classes/Image" },
-            { text: "Color", link: "/api/classes/Color" },
-          ],
-        },
-        {
-          text: "PDF Objects & Low Level",
-          items: [
-            { text: "PDFEngine", link: "/api/classes/PDFEngine" },
-            { text: "PDFPageWriter", link: "/api/classes/PDFPageWriter" },
-            { text: "PDFType0FontObject", link: "/api/classes/PDFType0FontObject" },
-            { text: "PDFCatalogObject", link: "/api/classes/PDFCatalogObject" },
-            { text: "PDFEncryptObject", link: "/api/classes/PDFEncryptObject" },
-            { text: "PDFFontObject", link: "/api/classes/PDFFontObject" },
-            { text: "PDFIndirectBaseObject", link: "/api/classes/PDFIndirectBaseObject" },
-            { text: "PDFIndirectStreamObject", link: "/api/classes/PDFIndirectStreamObject" },
-            { text: "PDFInfoObject", link: "/api/classes/PDFInfoObject" },
-            { text: "PDFPageObject", link: "/api/classes/PDFPageObject" },
-            { text: "PDFPagesObject", link: "/api/classes/PDFPagesObject" },
-          ],
-        },
-        {
-          text: "Interfaces & Utilities",
-          items: [
-            { text: "Component", link: "/api/interfaces/Component" },
-            { text: "LayoutContext", link: "/api/interfaces/LayoutContext" },
-            { text: "serialize", link: "/api/functions/serialize" },
-          ],
-        },
-      ],
+      "/api/": apiSidebar,
     },
     socialLinks: [{ icon: "github", link: "https://github.com/a1um1/mheePDF" }],
     footer: {
