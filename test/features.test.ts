@@ -143,3 +143,22 @@ test("Features: PDF Encryption (Password Protection & Permissions)", async () =>
   const decrypted = rc4(objKey, encryptedStreamData).toString("utf-8");
   expect(decrypted).toContain("Secret plaintext content.");
 });
+
+test("Features: Page Background Image", async () => {
+  const doc = new MheePDF({
+    pageSize: MheePDF.A4,
+    margin: 50,
+    compress: false,
+    backgroundImage: "test/resources/images/test-cat.jpg",
+  });
+  doc.addText("Hello World with background!");
+  const pdfBuf = doc.generate();
+  const pdfStr = pdfBuf.toString("binary");
+
+  // Verify the image was registered and output as an XObject
+  expect(pdfStr).toContain("/XObject");
+  expect(pdfStr).toContain("/Subtype /Image");
+  expect(pdfStr).toContain("/Filter /DCTDecode");
+
+  await write("test/test-background.pdf", pdfBuf);
+});

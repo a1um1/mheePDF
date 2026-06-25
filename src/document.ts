@@ -8,6 +8,7 @@ import type { Component, LayoutContext } from "./layout";
 import { Text, type TextOptions } from "./components/text";
 import { Image, type ImageOptions } from "./components/image";
 import { Table } from "./components/table";
+import { Line, type LineOptions } from "./components/line";
 import { PDFInfoObject } from "./object/indirect/info";
 import { PDFEncryptObject } from "./object/indirect/encrypt";
 import { getStandardFontTextWidth } from "./standardFonts";
@@ -28,6 +29,7 @@ export interface PDFEncryptionOptions {
 
 export interface MheePDFOptions {
   pageSize?: [number, number | "auto"];
+  rotate?: 0 | 90 | 180 | 270;
   margin?: number | { top?: number; bottom?: number; left?: number; right?: number };
   defaultFont?: string | PDFType0FontObject;
   defaultFontSize?: number;
@@ -48,9 +50,10 @@ export interface MheePDFOptions {
     modDate?: Date;
   };
   encrypt?: PDFEncryptionOptions;
+  backgroundImage?: string | Buffer;
 }
 
-export class MheePDF {
+export class MheePDF<T = any> {
   private pdf = new PDFEngine();
   private pages = this.pdf.addObject(new PDFPagesObject({ pages: [] }));
   private catalog = this.pdf.addObject(new PDFCatalogObject({ Base: this.pages }));
@@ -137,12 +140,14 @@ export class MheePDF {
     build: (page: PDFPageWriter) => void,
     options?: {
       margin?: number | { top?: number; bottom?: number; left?: number; right?: number };
+      rotate?: 0 | 90 | 180 | 270;
     },
   ): this {
     const pageObj = this.pdf.addObject(
       new PDFPageObject({
         pageSize: size,
         Parent: this.pages,
+        rotate: options?.rotate,
       }),
     );
     this.pages.addPage(pageObj);
@@ -184,19 +189,73 @@ export class MheePDF {
     this.components.push(new Image(source, options));
     return this;
   }
+  addLine(options?: LineOptions): this {
+    this.components.push(new Line(options));
+    return this;
+  }
+  addTemplateLoop(arrayPath: string, templateComponents: Component[]): this {
+    this.components.push(new TemplateLoopComponent(arrayPath, templateComponents));
+    return this;
+  }
 
-  generate(): Buffer {
-    if (this.components.length > 0) {
-      this.layoutComponents();
+  generate(data?: T | T[]): Buffer {
+    if (data !== undefined) {
+      if (Array.isArray(data)) {
+        for (const item of data) {
+          const compiled = this.getCompiledComponents(item);
+          if (compiled.length > 0) {
+            const bgImageSource = typeof this.options.backgroundImage === "string"
+              ? interpolate(this.options.backgroundImage, data, item)
+              : this.options.backgroundImage;
+            this.layoutComponents(compiled, bgImageSource);
+          }
+        }
+      } else {
+        const compiled = this.getCompiledComponents(data as T);
+        if (compiled.length > 0) {
+          const bgImageSource = typeof this.options.backgroundImage === "string"
+            ? interpolate(this.options.backgroundImage, data)
+            : this.options.backgroundImage;
+          this.layoutComponents(compiled, bgImageSource);
+        }
+      }
+    } else {
+      if (this.components.length > 0) {
+        this.layoutComponents(this.components, this.options.backgroundImage);
+      }
     }
     return this.pdf.generatePDFcontent();
   }
 
-  generatePDFcontent(): Buffer {
-    return this.generate();
+  generatePDFcontent(data?: T | T[]): Buffer {
+    return this.generate(data);
   }
 
-  private layoutComponents(): void {
+  private getCompiledComponents(globalData: T): Component[] {
+    const list: Component[] = [];
+    for (const comp of this.components) {
+      if (comp instanceof TemplateLoopComponent) {
+        const parts = comp.arrayPath.split(".");
+        let arr = globalData;
+        for (const part of parts) {
+          if (arr === null || arr === undefined) break;
+          arr = arr[part];
+        }
+        if (Array.isArray(arr)) {
+          for (const item of arr) {
+            for (const child of comp.templateComponents) {
+              list.push(compileComponent(child, globalData, item));
+            }
+          }
+        }
+      } else {
+        list.push(compileComponent(comp, globalData));
+      }
+    }
+    return list;
+  }
+
+  private layoutComponents(components: Component[], bgImageSource?: string | Buffer): void {
     const pageSize = this.options.pageSize || MheePDF.A4;
     const margin = this.options.margin ?? 50;
     const resolvedMargin =
@@ -241,7 +300,7 @@ export class MheePDF {
 
     if (isAutoHeight) {
       // Phase 1: Partition & Compute Heights
-      const queue = [...this.components];
+      const queue = [...components];
 
       interface PageLayoutInfo {
         pageHeight: number;
@@ -368,6 +427,7 @@ export class MheePDF {
       }
 
       // Phase 2: Actual Page Drawing
+      const bgImage = bgImageSource ? new Image(bgImageSource) : null;
       for (const pageInfo of pagesLayoutInfo) {
         let currentPageWriter: PDFPageWriter | null = null;
         this.addPage(
@@ -375,8 +435,17 @@ export class MheePDF {
           (writer) => {
             currentPageWriter = writer;
           },
-          { margin: resolvedMargin },
+          { margin: resolvedMargin, rotate: this.options.rotate },
         );
+
+        if (bgImage) {
+          bgImage.width = pageSize[0];
+          bgImage.height = pageInfo.pageHeight;
+          const savedMargin = { ...currentPageWriter!.margin };
+          currentPageWriter!.margin = { top: 0, bottom: 0, left: 0, right: 0 };
+          bgImage.draw(currentPageWriter!, 0, pageInfo.pageHeight, pageSize[0], pageInfo.pageHeight, context);
+          currentPageWriter!.margin = savedMargin;
+        }
 
         let currentY = pageInfo.pageHeight - resolvedMargin.top - resolvedMargin.bottom;
         for (const compInfo of pageInfo.components) {
@@ -390,20 +459,31 @@ export class MheePDF {
       let currentPageWriter: PDFPageWriter | null = null;
       let currentY = contentHeight;
 
+      const bgImage = bgImageSource ? new Image(bgImageSource) : null;
       const createNewPage = () => {
         this.addPage(
           [pageSize[0], fixedHeight],
           (writer) => {
             currentPageWriter = writer;
           },
-          { margin: resolvedMargin },
+          { margin: resolvedMargin, rotate: this.options.rotate },
         );
+
+        if (bgImage) {
+          bgImage.width = pageSize[0];
+          bgImage.height = fixedHeight;
+          const savedMargin = { ...currentPageWriter!.margin };
+          currentPageWriter!.margin = { top: 0, bottom: 0, left: 0, right: 0 };
+          bgImage.draw(currentPageWriter!, 0, fixedHeight, pageSize[0], fixedHeight, context);
+          currentPageWriter!.margin = savedMargin;
+        }
+
         currentY = contentHeight;
       };
 
       createNewPage();
 
-      const queue = [...this.components];
+      const queue = [...components];
 
       while (queue.length > 0) {
         const component = queue.shift()!;
@@ -461,3 +541,174 @@ export class MheePDF {
     }
   }
 }
+
+export class TemplateLoopComponent implements Component {
+  constructor(
+    public arrayPath: string,
+    public templateComponents: Component[],
+  ) {}
+
+  measure(width: number, context: LayoutContext): { width: number; height: number } {
+    return { width: 0, height: 0 };
+  }
+
+  draw(
+    writer: PDFPageWriter,
+    x: number,
+    y: number,
+    width: number,
+    availableHeight: number,
+    context: LayoutContext,
+  ): Component | null {
+    return null;
+  }
+}
+
+export function interpolate(str: string, data: any, itemData?: any): string {
+  if (typeof str !== "string") return str;
+  return str.replace(/\{\{([^}]+)\}\}/g, (match, path) => {
+    const trimmedPath = path.trim();
+    // 1. If path starts with "item.", look up in itemData
+    if (itemData && (trimmedPath === "item" || trimmedPath.startsWith("item."))) {
+      if (trimmedPath === "item") return itemData;
+      const parts = trimmedPath.substring(5).split(".");
+      let val = itemData;
+      for (const part of parts) {
+        if (val === null || val === undefined) break;
+        val = val[part];
+      }
+      if (val !== undefined && val !== null) return String(val);
+    }
+    // 2. Otherwise, look up in itemData (without prefix)
+    if (itemData) {
+      const parts = trimmedPath.split(".");
+      let val = itemData;
+      for (const part of parts) {
+        if (val === null || val === undefined) break;
+        val = val[part];
+      }
+      if (val !== undefined && val !== null) return String(val);
+    }
+    // 3. Fallback to global data
+    const parts = trimmedPath.split(".");
+    let val = data;
+    for (const part of parts) {
+      if (val === null || val === undefined) break;
+      val = val[part];
+    }
+    return val !== undefined && val !== null ? String(val) : "";
+  });
+}
+
+import { TableCell, type CellContent } from "./components/table";
+
+export function compileComponent(component: Component, globalData: any, itemData?: any): Component {
+  if (component instanceof Text) {
+    return new Text(interpolate(component.text, globalData, itemData), {
+      font: component.font,
+      fontSize: component.fontSize,
+      lineHeight: component.lineHeight,
+      color: typeof component.color === "string" ? interpolate(component.color, globalData, itemData) : component.color,
+      charSpacing: component.charSpacing,
+      align: component.align,
+    });
+  }
+  if (component instanceof Image) {
+    const resolvedSource = typeof component.source === "string"
+      ? interpolate(component.source, globalData, itemData)
+      : component.source;
+    return new Image(resolvedSource, {
+      width: component.width,
+      height: component.height,
+      align: component.align,
+    });
+  }
+  if (component instanceof Line) {
+    return new Line({
+      color: typeof component.color === "string" ? interpolate(component.color, globalData, itemData) : component.color,
+      thickness: component.thickness,
+      dash: component.dash,
+      dashPhase: component.dashPhase,
+      height: component.height,
+    });
+  }
+  if (component instanceof Table) {
+    const compiledTable = new Table({
+      columns: component.columns,
+      borderWidth: component.borderWidth,
+      borderColor: component.borderColor,
+      backgroundColor: component.backgroundColor,
+      headerBackgroundColor: component.headerBackgroundColor,
+      alternateRowBackgroundColor: component.alternateRowBackgroundColor,
+      padding: component.padding,
+      repeatHeader: component.repeatHeader,
+      aligns: component.aligns,
+      valign: component.valign,
+      valigns: component.valigns,
+    });
+
+    // Copy and compile headers
+    if (component.headers && component.headers.length > 0) {
+      compiledTable.headers = component.headers.map(cell => {
+        return new TableCell(compileComponent(cell.content, globalData, itemData), {
+          backgroundColor: cell.backgroundColor,
+          valign: cell.valign,
+        });
+      });
+    }
+
+    // Compile rows: first, copy and compile the existing static rows
+    for (const row of component.rows) {
+      compiledTable.rows.push(row.map(cell => {
+        return new TableCell(compileComponent(cell.content, globalData, itemData), {
+          backgroundColor: cell.backgroundColor,
+          valign: cell.valign,
+        });
+      }));
+    }
+
+    // Now, expand the template rows
+    const templateRows = (component as any).templateRows || [];
+    for (const tempRow of templateRows) {
+      const parts = tempRow.arrayPath.split(".");
+      let arr = globalData;
+      for (const part of parts) {
+        if (arr === null || arr === undefined) break;
+        arr = arr[part];
+      }
+      if (Array.isArray(arr)) {
+        for (const item of arr) {
+          const compiledRow = tempRow.cells.map((cell: any) => {
+            if (cell instanceof TableCell) {
+              return new TableCell(compileComponent(cell.content, globalData, item), {
+                backgroundColor: cell.backgroundColor,
+                valign: cell.valign,
+              });
+            }
+            if (cell && typeof cell === "object" && "content" in cell) {
+              const contentComp = cell.content instanceof TableCell
+                ? cell.content.content
+                : (typeof cell.content === "string" || typeof cell.content === "number"
+                    ? new Text(cell.content.toString())
+                    : cell.content);
+              return new TableCell(compileComponent(contentComp, globalData, item), {
+                backgroundColor: cell.backgroundColor,
+                valign: cell.valign,
+              });
+            }
+            const comp = typeof cell === "string" || typeof cell === "number"
+              ? new Text(cell.toString())
+              : cell;
+            return new TableCell(compileComponent(comp, globalData, item));
+          });
+          compiledTable.rows.push(compiledRow);
+        }
+      }
+    }
+
+    return compiledTable;
+  }
+
+  return component;
+}
+

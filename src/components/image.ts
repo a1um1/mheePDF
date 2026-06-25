@@ -32,7 +32,9 @@ export class Image implements Component {
     this.height = options?.height;
     this.align = options?.align || "left";
 
-    this.loadAndParse();
+    if (!(typeof this.source === "string" && this.source.includes("{{"))) {
+      this.loadAndParse();
+    }
   }
 
   private loadAndParse(): void {

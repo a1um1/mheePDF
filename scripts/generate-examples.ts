@@ -33,10 +33,28 @@ const examples = [
     description: "Embedding JPEG photos, transparent PNGs with alpha channel masking (SMask), and inline SVG vector paths."
   },
   {
+    id: "encrypt",
+    file: "encrypt.ts",
+    title: "PDF Encryption & Security",
+    description: "Demonstrates built-in PDF encryption, password protection (user and owner passwords), and fine-grained document permission controls."
+  },
+  {
+    id: "certificate",
+    file: "certificate.ts",
+    title: "Student Certificate Template",
+    description: "Features a certificate template using a landscape layout, full-page background image, and dynamic text interpolation."
+  },
+  {
     id: "invoice",
     file: "invoice.ts",
     title: "Professional Invoice",
     description: "A complete real-world invoice layout featuring company details, billed-to section, line items tables, tax summary, and footer notes."
+  },
+  {
+    id: "receipt",
+    file: "receipt.ts",
+    title: "POS Receipt Slip",
+    description: "An infinite/auto height receipt slip (80mm width) for a cafe diner featuring an SVG bear logo, 20 line items with Thai typography, subtotals, and 7% tax calculations."
   }
 ];
 

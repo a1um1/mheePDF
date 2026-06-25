@@ -312,6 +312,8 @@ export class PDFPageWriter {
     y2: number,
     strokeWidth: number = 1,
     strokeColor: Color | string = "0 G",
+    dashPattern?: number[],
+    dashPhase: number = 0,
   ): this {
     const x1_actual = x1 + this.margin.left;
     const y1_actual = y1 + this.margin.bottom;
@@ -324,6 +326,10 @@ export class PDFPageWriter {
     const strokeColorObj = Color.coerce(strokeColor);
     this.applyColorOpacity(strokeColorObj, "stroke");
     this.commands.push(strokeColorObj.toPDFStroke());
+
+    if (dashPattern && dashPattern.length > 0) {
+      this.commands.push(`[${dashPattern.join(" ")}] ${dashPhase} d`);
+    }
 
     this.commands.push(`${x1_actual} ${y1_actual} m`);
     this.commands.push(`${x2_actual} ${y2_actual} l`);

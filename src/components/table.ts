@@ -75,6 +75,7 @@ export class Table implements Component {
   public aligns?: ("left" | "center" | "right")[];
   public valign?: "top" | "middle" | "bottom";
   public valigns?: ("top" | "middle" | "bottom")[];
+  public templateRows: { arrayPath: string; cells: CellContent[] }[] = [];
 
   constructor(options: {
     columns: (number | string)[];
@@ -132,6 +133,11 @@ export class Table implements Component {
 
   addRow(row: CellContent[]): this {
     this.rows.push(row.map((cell, colIdx) => this.getCellComponent(cell, colIdx)));
+    return this;
+  }
+
+  addTemplateRow(arrayPath: string, cells: CellContent[]): this {
+    this.templateRows.push({ arrayPath, cells });
     return this;
   }
 
