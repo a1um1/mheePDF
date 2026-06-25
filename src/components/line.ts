@@ -1,6 +1,6 @@
 import type { Component, LayoutContext } from "../layout";
 import type { PDFPageWriter } from "../writer";
-import { Color } from "../color";
+import { Color } from "../utils/color";
 
 export type LineOptions = {
   color?: string | Color;

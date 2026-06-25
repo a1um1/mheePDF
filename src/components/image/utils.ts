@@ -1,5 +1,5 @@
 import { Buffer } from "buffer";
-import { ensureBuffer } from "../../utils";
+import { ensureBuffer } from "../../utils/buffer";
 
 export type ImageOptions = {
   width?: number;
@@ -50,7 +50,7 @@ export function computeDimensions(
   imgHeight: number,
   optWidth: number | undefined,
   optHeight: number | undefined,
-  containerWidth: number
+  containerWidth: number,
 ): { w: number; h: number } {
   let w = optWidth;
   let h = optHeight;
@@ -78,7 +78,7 @@ export function computeDimensions(
 export function xOffset(
   align: "left" | "center" | "right",
   containerWidth: number,
-  drawWidth: number
+  drawWidth: number,
 ): number {
   if (align === "center") return (containerWidth - drawWidth) / 2;
   if (align === "right") return containerWidth - drawWidth;

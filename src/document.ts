@@ -12,11 +12,11 @@ import { Line, type LineOptions } from "./components/line";
 import { Svg, type SvgOptions } from "./components/svg";
 import { PDFInfoObject } from "./object/indirect/info";
 import { PDFEncryptObject } from "./object/indirect/encrypt";
-import { getStandardFontTextWidth } from "./standardFonts";
+import { getStandardFontTextWidth } from "./utils/standardFonts";
 
 import { Buffer } from "buffer";
-import { randomBytes } from "./crypto";
-import { computeOValue, computeEncryptionKey, computeUValue } from "./crypto";
+import { randomBytes } from "./utils/crypto";
+import { computeOValue, computeEncryptionKey, computeUValue } from "./utils/crypto";
 
 export interface PDFEncryptionOptions {
   userPassword?: string;
@@ -210,18 +210,20 @@ export class MheePDF<T = any> {
         for (const item of data) {
           const compiled = this.getCompiledComponents(item);
           if (compiled.length > 0) {
-            const bgImageSource = typeof this.options.backgroundImage === "string"
-              ? interpolate(this.options.backgroundImage, data, item)
-              : this.options.backgroundImage;
+            const bgImageSource =
+              typeof this.options.backgroundImage === "string"
+                ? interpolate(this.options.backgroundImage, data, item)
+                : this.options.backgroundImage;
             this.layoutComponents(compiled, bgImageSource);
           }
         }
       } else {
         const compiled = this.getCompiledComponents(data as T);
         if (compiled.length > 0) {
-          const bgImageSource = typeof this.options.backgroundImage === "string"
-            ? interpolate(this.options.backgroundImage, data)
-            : this.options.backgroundImage;
+          const bgImageSource =
+            typeof this.options.backgroundImage === "string"
+              ? interpolate(this.options.backgroundImage, data)
+              : this.options.backgroundImage;
           this.layoutComponents(compiled, bgImageSource);
         }
       }
@@ -452,7 +454,14 @@ export class MheePDF<T = any> {
           bgImage.height = pageInfo.pageHeight;
           const savedMargin = { ...currentPageWriter!.margin };
           currentPageWriter!.margin = { top: 0, bottom: 0, left: 0, right: 0 };
-          bgImage.draw(currentPageWriter!, 0, pageInfo.pageHeight, pageSize[0], pageInfo.pageHeight, context);
+          bgImage.draw(
+            currentPageWriter!,
+            0,
+            pageInfo.pageHeight,
+            pageSize[0],
+            pageInfo.pageHeight,
+            context,
+          );
           currentPageWriter!.margin = savedMargin;
         }
 
@@ -617,15 +626,19 @@ export function compileComponent(component: Component, globalData: any, itemData
       font: component.font,
       fontSize: component.fontSize,
       lineHeight: component.lineHeight,
-      color: typeof component.color === "string" ? interpolate(component.color, globalData, itemData) : component.color,
+      color:
+        typeof component.color === "string"
+          ? interpolate(component.color, globalData, itemData)
+          : component.color,
       charSpacing: component.charSpacing,
       align: component.align,
     });
   }
   if (component instanceof Image) {
-    const resolvedSource = typeof component.source === "string"
-      ? interpolate(component.source, globalData, itemData)
-      : component.source;
+    const resolvedSource =
+      typeof component.source === "string"
+        ? interpolate(component.source, globalData, itemData)
+        : component.source;
     return new Image(resolvedSource, {
       width: component.width,
       height: component.height,
@@ -634,7 +647,10 @@ export function compileComponent(component: Component, globalData: any, itemData
   }
   if (component instanceof Line) {
     return new Line({
-      color: typeof component.color === "string" ? interpolate(component.color, globalData, itemData) : component.color,
+      color:
+        typeof component.color === "string"
+          ? interpolate(component.color, globalData, itemData)
+          : component.color,
       thickness: component.thickness,
       dash: component.dash,
       dashPhase: component.dashPhase,
@@ -658,7 +674,7 @@ export function compileComponent(component: Component, globalData: any, itemData
 
     // Copy and compile headers
     if (component.headers && component.headers.length > 0) {
-      compiledTable.headers = component.headers.map(cell => {
+      compiledTable.headers = component.headers.map((cell) => {
         return new TableCell(compileComponent(cell.content, globalData, itemData), {
           backgroundColor: cell.backgroundColor,
           valign: cell.valign,
@@ -668,12 +684,14 @@ export function compileComponent(component: Component, globalData: any, itemData
 
     // Compile rows: first, copy and compile the existing static rows
     for (const row of component.rows) {
-      compiledTable.rows.push(row.map(cell => {
-        return new TableCell(compileComponent(cell.content, globalData, itemData), {
-          backgroundColor: cell.backgroundColor,
-          valign: cell.valign,
-        });
-      }));
+      compiledTable.rows.push(
+        row.map((cell) => {
+          return new TableCell(compileComponent(cell.content, globalData, itemData), {
+            backgroundColor: cell.backgroundColor,
+            valign: cell.valign,
+          });
+        }),
+      );
     }
 
     // Now, expand the template rows
@@ -695,19 +713,21 @@ export function compileComponent(component: Component, globalData: any, itemData
               });
             }
             if (cell && typeof cell === "object" && "content" in cell) {
-              const contentComp = cell.content instanceof TableCell
-                ? cell.content.content
-                : (typeof cell.content === "string" || typeof cell.content === "number"
+              const contentComp =
+                cell.content instanceof TableCell
+                  ? cell.content.content
+                  : typeof cell.content === "string" || typeof cell.content === "number"
                     ? new Text(cell.content.toString())
-                    : cell.content);
+                    : cell.content;
               return new TableCell(compileComponent(contentComp, globalData, item), {
                 backgroundColor: cell.backgroundColor,
                 valign: cell.valign,
               });
             }
-            const comp = typeof cell === "string" || typeof cell === "number"
-              ? new Text(cell.toString())
-              : cell;
+            const comp =
+              typeof cell === "string" || typeof cell === "number"
+                ? new Text(cell.toString())
+                : cell;
             return new TableCell(compileComponent(comp, globalData, item));
           });
           compiledTable.rows.push(compiledRow);
@@ -720,4 +740,3 @@ export function compileComponent(component: Component, globalData: any, itemData
 
   return component;
 }
-

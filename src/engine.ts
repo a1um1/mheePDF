@@ -2,8 +2,8 @@ import { Buffer } from "buffer";
 import type { PDFIndirectBaseObject } from "./object/indirect/baseIndirect";
 import { PDFCatalogObject } from "./object/indirect/catalog";
 import { PDFTailerObject } from "./object/tailer";
-import { randomBytes } from "./crypto";
-import { deriveObjectKey, rc4 } from "./crypto";
+import { randomBytes } from "./utils/crypto";
+import { deriveObjectKey, rc4 } from "./utils/crypto";
 
 export class PDFEngine {
   protected objects: PDFIndirectBaseObject[] = [];

@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { md5, randomBytes } from "../src/crypto";
+import { md5, randomBytes } from "../src/utils/crypto";
 import { createHash } from "crypto";
 import { Buffer } from "buffer";
 

@@ -1,6 +1,6 @@
 import type { Component, LayoutContext } from "../layout";
 import type { PDFPageWriter } from "../writer";
-import { Color } from "../color";
+import { Color } from "../utils/color";
 import { escapePDFString } from "../object/serialize";
 import { getPDFTextCommands } from "../writer";
 import { Buffer } from "buffer";
@@ -133,12 +133,12 @@ function multiplyMatrices(m1: number[], m2: number[]): number[] {
   const [a1, b1, c1, d1, e1, f1] = m1;
   const [a2, b2, c2, d2, e2, f2] = m2;
   return [
-    a1 * a2 + c1 * b2,          // a
-    b1 * a2 + d1 * b2,          // b
-    a1 * c2 + c1 * d2,          // c
-    b1 * c2 + d1 * d2,          // d
-    a1 * e2 + c1 * f2 + e1,     // e
-    b1 * e2 + d1 * f2 + f1      // f
+    a1 * a2 + c1 * b2, // a
+    b1 * a2 + d1 * b2, // b
+    a1 * c2 + c1 * d2, // c
+    b1 * c2 + d1 * d2, // d
+    a1 * e2 + c1 * f2 + e1, // e
+    b1 * e2 + d1 * f2 + f1, // f
   ];
 }
 
@@ -148,7 +148,10 @@ function parseTransform(transformStr: string): number[] {
   let match;
   while ((match = regex.exec(transformStr)) !== null) {
     const type = match[1];
-    const args = match[2]!.split(/[\s,]+/).map(parseFloat).filter(n => !isNaN(n));
+    const args = match[2]!
+      .split(/[\s,]+/)
+      .map(parseFloat)
+      .filter((n) => !isNaN(n));
     let m = [1, 0, 0, 1, 0, 0];
 
     if (type === "translate") {
@@ -167,11 +170,7 @@ function parseTransform(transformStr: string): number[] {
       if (args.length >= 3) {
         const cx = args[1]!;
         const cy = args[2]!;
-        m = [
-          cos, sin, -sin, cos,
-          -cx * cos + cy * sin + cx,
-          -cx * sin - cy * cos + cy
-        ];
+        m = [cos, sin, -sin, cos, -cx * cos + cy * sin + cx, -cx * sin - cy * cos + cy];
       } else {
         m = [cos, sin, -sin, cos, 0, 0];
       }
@@ -328,7 +327,7 @@ function svgPathToPDF(d: string): string {
         const x = readNum();
         const y = readNum();
         pdfCommands.push(
-          `${x1.toFixed(4)} ${y1.toFixed(4)} ${x2.toFixed(4)} ${y2.toFixed(4)} ${x.toFixed(4)} ${y.toFixed(4)} c`
+          `${x1.toFixed(4)} ${y1.toFixed(4)} ${x2.toFixed(4)} ${y2.toFixed(4)} ${x.toFixed(4)} ${y.toFixed(4)} c`,
         );
         lastControlX = x2;
         lastControlY = y2;
@@ -351,7 +350,7 @@ function svgPathToPDF(d: string): string {
         const x = currX + dx;
         const y = currY + dy;
         pdfCommands.push(
-          `${x1.toFixed(4)} ${y1.toFixed(4)} ${x2.toFixed(4)} ${y2.toFixed(4)} ${x.toFixed(4)} ${y.toFixed(4)} c`
+          `${x1.toFixed(4)} ${y1.toFixed(4)} ${x2.toFixed(4)} ${y2.toFixed(4)} ${x.toFixed(4)} ${y.toFixed(4)} c`,
         );
         lastControlX = x2;
         lastControlY = y2;
@@ -367,12 +366,17 @@ function svgPathToPDF(d: string): string {
         const y = readNum();
         let x1 = currX;
         let y1 = currY;
-        if (lastCommand === "C" || lastCommand === "c" || lastCommand === "S" || lastCommand === "s") {
+        if (
+          lastCommand === "C" ||
+          lastCommand === "c" ||
+          lastCommand === "S" ||
+          lastCommand === "s"
+        ) {
           x1 = 2 * currX - lastControlX;
           y1 = 2 * currY - lastControlY;
         }
         pdfCommands.push(
-          `${x1.toFixed(4)} ${y1.toFixed(4)} ${x2.toFixed(4)} ${y2.toFixed(4)} ${x.toFixed(4)} ${y.toFixed(4)} c`
+          `${x1.toFixed(4)} ${y1.toFixed(4)} ${x2.toFixed(4)} ${y2.toFixed(4)} ${x.toFixed(4)} ${y.toFixed(4)} c`,
         );
         lastControlX = x2;
         lastControlY = y2;
@@ -392,12 +396,17 @@ function svgPathToPDF(d: string): string {
         const y = currY + dy;
         let x1 = currX;
         let y1 = currY;
-        if (lastCommand === "C" || lastCommand === "c" || lastCommand === "S" || lastCommand === "s") {
+        if (
+          lastCommand === "C" ||
+          lastCommand === "c" ||
+          lastCommand === "S" ||
+          lastCommand === "s"
+        ) {
           x1 = 2 * currX - lastControlX;
           y1 = 2 * currY - lastControlY;
         }
         pdfCommands.push(
-          `${x1.toFixed(4)} ${y1.toFixed(4)} ${x2.toFixed(4)} ${y2.toFixed(4)} ${x.toFixed(4)} ${y.toFixed(4)} c`
+          `${x1.toFixed(4)} ${y1.toFixed(4)} ${x2.toFixed(4)} ${y2.toFixed(4)} ${x.toFixed(4)} ${y.toFixed(4)} c`,
         );
         lastControlX = x2;
         lastControlY = y2;
@@ -416,7 +425,7 @@ function svgPathToPDF(d: string): string {
         const cx2 = x + (2 / 3) * (x1 - x);
         const cy2 = y + (2 / 3) * (y1 - y);
         pdfCommands.push(
-          `${cx1.toFixed(4)} ${cy1.toFixed(4)} ${cx2.toFixed(4)} ${cy2.toFixed(4)} ${x.toFixed(4)} ${y.toFixed(4)} c`
+          `${cx1.toFixed(4)} ${cy1.toFixed(4)} ${cx2.toFixed(4)} ${cy2.toFixed(4)} ${x.toFixed(4)} ${y.toFixed(4)} c`,
         );
         lastControlX = x1;
         lastControlY = y1;
@@ -439,7 +448,7 @@ function svgPathToPDF(d: string): string {
         const cx2 = x + (2 / 3) * (x1 - x);
         const cy2 = y + (2 / 3) * (y1 - y);
         pdfCommands.push(
-          `${cx1.toFixed(4)} ${cy1.toFixed(4)} ${cx2.toFixed(4)} ${cy2.toFixed(4)} ${x.toFixed(4)} ${y.toFixed(4)} c`
+          `${cx1.toFixed(4)} ${cy1.toFixed(4)} ${cx2.toFixed(4)} ${cy2.toFixed(4)} ${x.toFixed(4)} ${y.toFixed(4)} c`,
         );
         lastControlX = x1;
         lastControlY = y1;
@@ -453,7 +462,12 @@ function svgPathToPDF(d: string): string {
         const y = readNum();
         let x1 = currX;
         let y1 = currY;
-        if (lastCommand === "Q" || lastCommand === "q" || lastCommand === "T" || lastCommand === "t") {
+        if (
+          lastCommand === "Q" ||
+          lastCommand === "q" ||
+          lastCommand === "T" ||
+          lastCommand === "t"
+        ) {
           x1 = 2 * currX - lastControlX;
           y1 = 2 * currY - lastControlY;
         }
@@ -462,7 +476,7 @@ function svgPathToPDF(d: string): string {
         const cx2 = x + (2 / 3) * (x1 - x);
         const cy2 = y + (2 / 3) * (y1 - y);
         pdfCommands.push(
-          `${cx1.toFixed(4)} ${cy1.toFixed(4)} ${cx2.toFixed(4)} ${cy2.toFixed(4)} ${x.toFixed(4)} ${y.toFixed(4)} c`
+          `${cx1.toFixed(4)} ${cy1.toFixed(4)} ${cx2.toFixed(4)} ${cy2.toFixed(4)} ${x.toFixed(4)} ${y.toFixed(4)} c`,
         );
         lastControlX = x1;
         lastControlY = y1;
@@ -478,7 +492,12 @@ function svgPathToPDF(d: string): string {
         const y = currY + dy;
         let x1 = currX;
         let y1 = currY;
-        if (lastCommand === "Q" || lastCommand === "q" || lastCommand === "T" || lastCommand === "t") {
+        if (
+          lastCommand === "Q" ||
+          lastCommand === "q" ||
+          lastCommand === "T" ||
+          lastCommand === "t"
+        ) {
           x1 = 2 * currX - lastControlX;
           y1 = 2 * currY - lastControlY;
         }
@@ -487,7 +506,7 @@ function svgPathToPDF(d: string): string {
         const cx2 = x + (2 / 3) * (x1 - x);
         const cy2 = y + (2 / 3) * (y1 - y);
         pdfCommands.push(
-          `${cx1.toFixed(4)} ${cy1.toFixed(4)} ${cx2.toFixed(4)} ${cy2.toFixed(4)} ${x.toFixed(4)} ${y.toFixed(4)} c`
+          `${cx1.toFixed(4)} ${cy1.toFixed(4)} ${cx2.toFixed(4)} ${cy2.toFixed(4)} ${x.toFixed(4)} ${y.toFixed(4)} c`,
         );
         lastControlX = x1;
         lastControlY = y1;
@@ -533,15 +552,17 @@ function convertShapeToPath(node: SVGNode): string {
       const kappa = 0.5522847498;
       const ox = rx * kappa;
       const oy = ry * kappa;
-      return `M ${x + rx} ${y} ` +
-             `L ${x + w - rx} ${y} ` +
-             `C ${x + w - rx + ox} ${y} ${x + w} ${y + ry - oy} ${x + w} ${y + ry} ` +
-             `L ${x + w} ${y + h - ry} ` +
-             `C ${x + w} ${y + h - ry + oy} ${x + w - rx + ox} ${y + h} ${x + w - rx} ${y + h} ` +
-             `L ${x + rx} ${y + h} ` +
-             `C ${x + rx - ox} ${y + h} ${x} ${y + h - ry + oy} ${x} ${y + h - ry} ` +
-             `L ${x} ${y + ry} ` +
-             `C ${x} ${y + ry - oy} ${x + rx - ox} ${y} ${x + rx} ${y} z`;
+      return (
+        `M ${x + rx} ${y} ` +
+        `L ${x + w - rx} ${y} ` +
+        `C ${x + w - rx + ox} ${y} ${x + w} ${y + ry - oy} ${x + w} ${y + ry} ` +
+        `L ${x + w} ${y + h - ry} ` +
+        `C ${x + w} ${y + h - ry + oy} ${x + w - rx + ox} ${y + h} ${x + w - rx} ${y + h} ` +
+        `L ${x + rx} ${y + h} ` +
+        `C ${x + rx - ox} ${y + h} ${x} ${y + h - ry + oy} ${x} ${y + h - ry} ` +
+        `L ${x} ${y + ry} ` +
+        `C ${x} ${y + ry - oy} ${x + rx - ox} ${y} ${x + rx} ${y} z`
+      );
     }
   }
 
@@ -552,11 +573,13 @@ function convertShapeToPath(node: SVGNode): string {
     const kappa = 0.5522847498;
     const ox = r * kappa;
     const oy = r * kappa;
-    return `M ${cx - r} ${cy} ` +
-           `C ${cx - r} ${cy - oy} ${cx - ox} ${cy - r} ${cx} ${cy - r} ` +
-           `C ${cx + ox} ${cy - r} ${cx + r} ${cy - oy} ${cx + r} ${cy} ` +
-           `C ${cx + r} ${cy + oy} ${cx + ox} ${cy + r} ${cx} ${cy + r} ` +
-           `C ${cx - ox} ${cy + r} ${cx - r} ${cy + oy} ${cx - r} ${cy} z`;
+    return (
+      `M ${cx - r} ${cy} ` +
+      `C ${cx - r} ${cy - oy} ${cx - ox} ${cy - r} ${cx} ${cy - r} ` +
+      `C ${cx + ox} ${cy - r} ${cx + r} ${cy - oy} ${cx + r} ${cy} ` +
+      `C ${cx + r} ${cy + oy} ${cx + ox} ${cy + r} ${cx} ${cy + r} ` +
+      `C ${cx - ox} ${cy + r} ${cx - r} ${cy + oy} ${cx - r} ${cy} z`
+    );
   }
 
   if (name === "ellipse") {
@@ -567,11 +590,13 @@ function convertShapeToPath(node: SVGNode): string {
     const kappa = 0.5522847498;
     const ox = rx * kappa;
     const oy = ry * kappa;
-    return `M ${cx - rx} ${cy} ` +
-           `C ${cx - rx} ${cy - oy} ${cx - ox} ${cy - ry} ${cx} ${cy - ry} ` +
-           `C ${cx + ox} ${cy - ry} ${cx + rx} ${cy - oy} ${cx + rx} ${cy} ` +
-           `C ${cx + rx} ${cy + oy} ${cx + ox} ${cy + ry} ${cx} ${cy + ry} ` +
-           `C ${cx - ox} ${cy + ry} ${cx - rx} ${cy + oy} ${cx - rx} ${cy} z`;
+    return (
+      `M ${cx - rx} ${cy} ` +
+      `C ${cx - rx} ${cy - oy} ${cx - ox} ${cy - ry} ${cx} ${cy - ry} ` +
+      `C ${cx + ox} ${cy - ry} ${cx + rx} ${cy - oy} ${cx + rx} ${cy} ` +
+      `C ${cx + rx} ${cy + oy} ${cx + ox} ${cy + ry} ${cx} ${cy + ry} ` +
+      `C ${cx - ox} ${cy + ry} ${cx - rx} ${cy + oy} ${cx - rx} ${cy} z`
+    );
   }
 
   if (name === "line") {
@@ -584,11 +609,15 @@ function convertShapeToPath(node: SVGNode): string {
 
   if (name === "polyline" || name === "polygon") {
     const pointsStr = attrs.points || "";
-    const coords = pointsStr.trim().split(/[\s,]+/).map(parseFloat).filter(n => !isNaN(n));
+    const coords = pointsStr
+      .trim()
+      .split(/[\s,]+/)
+      .map(parseFloat)
+      .filter((n) => !isNaN(n));
     if (coords.length >= 2) {
       let path = `M ${coords[0]} ${coords[1]}`;
       for (let j = 2; j < coords.length; j += 2) {
-        path += ` L ${coords[j]} ${coords[j+1]}`;
+        path += ` L ${coords[j]} ${coords[j + 1]}`;
       }
       if (name === "polygon") {
         path += " z";
@@ -653,7 +682,11 @@ export class Svg implements Component {
     let svgH = parseFloat(root.attributes.height || "0");
 
     if (vb) {
-      const parts = vb.trim().split(/[\s,]+/).map(parseFloat).filter(n => !isNaN(n));
+      const parts = vb
+        .trim()
+        .split(/[\s,]+/)
+        .map(parseFloat)
+        .filter((n) => !isNaN(n));
       if (parts.length === 4) {
         const vbWidth = parts[2]!;
         const vbHeight = parts[3]!;
@@ -742,7 +775,9 @@ export class Svg implements Component {
 
     const commands: string[] = [];
     commands.push("q");
-    commands.push(`${scaleX.toFixed(6)} 0 0 ${scaleY.toFixed(6)} ${translateX.toFixed(6)} ${translateY.toFixed(6)} cm`);
+    commands.push(
+      `${scaleX.toFixed(6)} 0 0 ${scaleY.toFixed(6)} ${translateX.toFixed(6)} ${translateY.toFixed(6)} cm`,
+    );
 
     this.renderNode(this.rootNode, {}, writer, commands);
 
@@ -784,7 +819,9 @@ export class Svg implements Component {
     if (hasTransform) {
       commands.push("q");
       const m = parseTransform(node.attributes.transform);
-      commands.push(`${m[0].toFixed(6)} ${m[1].toFixed(6)} ${m[2].toFixed(6)} ${m[3].toFixed(6)} ${m[4].toFixed(6)} ${m[5].toFixed(6)} cm`);
+      commands.push(
+        `${m[0].toFixed(6)} ${m[1].toFixed(6)} ${m[2].toFixed(6)} ${m[3].toFixed(6)} ${m[4].toFixed(6)} ${m[5].toFixed(6)} cm`,
+      );
     }
 
     const name = node.name;
@@ -815,7 +852,9 @@ export class Svg implements Component {
           this.renderNode(resolvedNode, nodeStyle, writer, commands);
         }
       }
-    } else if (["path", "rect", "circle", "ellipse", "line", "polyline", "polygon"].includes(name)) {
+    } else if (
+      ["path", "rect", "circle", "ellipse", "line", "polyline", "polygon"].includes(name)
+    ) {
       let d = "";
       if (name === "path") {
         d = node.attributes.d || "";
@@ -866,11 +905,17 @@ export class Svg implements Component {
             commands.push(strokeCol.toPDFStroke());
             commands.push(`${strokeWidth} w`);
 
-            const dasharray = node.attributes["stroke-dasharray"] || inlineStyles["stroke-dasharray"];
+            const dasharray =
+              node.attributes["stroke-dasharray"] || inlineStyles["stroke-dasharray"];
             if (dasharray && dasharray !== "none") {
-              const dashPattern = dasharray.split(/[\s,]+/).map(parseFloat).filter(n => !isNaN(n));
+              const dashPattern = dasharray
+                .split(/[\s,]+/)
+                .map(parseFloat)
+                .filter((n) => !isNaN(n));
               if (dashPattern.length > 0) {
-                const dashPhase = parseFloat(node.attributes["stroke-dashoffset"] || inlineStyles["stroke-dashoffset"] || "0");
+                const dashPhase = parseFloat(
+                  node.attributes["stroke-dashoffset"] || inlineStyles["stroke-dashoffset"] || "0",
+                );
                 commands.push(`[${dashPattern.join(" ")}] ${dashPhase} d`);
               }
             }
@@ -940,7 +985,7 @@ export class Svg implements Component {
       fontSize,
       fill: fillVal,
       stroke: strokeVal,
-      strokeWidth: nodeStyle.strokeWidth || "1"
+      strokeWidth: nodeStyle.strokeWidth || "1",
     };
 
     const processChild = (child: SVGNode, ctx: TextContext) => {
@@ -953,11 +998,15 @@ export class Svg implements Component {
       const childInlineStyles = parseStyleAttribute(child.attributes.style || "");
 
       const getChildStyleVal = (key: string, attrKey: string, parentVal: string): string => {
-        return childInlineStyles[key] || child.attributes[attrKey] || child.attributes[key] || parentVal;
+        return (
+          childInlineStyles[key] || child.attributes[attrKey] || child.attributes[key] || parentVal
+        );
       };
 
       const childSizeRaw = getChildStyleVal("font-size", "fontSize", "");
-      const childSize = childSizeRaw ? parseFloat(childSizeRaw.replace("px", "").replace("pt", "").trim()) : ctx.fontSize;
+      const childSize = childSizeRaw
+        ? parseFloat(childSizeRaw.replace("px", "").replace("pt", "").trim())
+        : ctx.fontSize;
 
       const childFill = getChildStyleVal("fill", "fill", ctx.fill);
       const childStroke = getChildStyleVal("stroke", "stroke", ctx.stroke);
@@ -997,7 +1046,7 @@ export class Svg implements Component {
             child.content,
             writer["activeFontObject"],
             nextCtx.fontSize,
-            0
+            0,
           );
           commands.push(textCmds);
         } else {
@@ -1016,7 +1065,10 @@ export class Svg implements Component {
 
     const textContent = node.content;
     if (textContent) {
-      processChild({ name: "#text", attributes: {}, children: [], content: textContent }, initialCtx);
+      processChild(
+        { name: "#text", attributes: {}, children: [], content: textContent },
+        initialCtx,
+      );
     }
 
     for (const child of node.children) {

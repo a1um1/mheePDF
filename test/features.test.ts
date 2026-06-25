@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { write } from "bun";
 import { MheePDF } from "../src";
-import { rc4, deriveObjectKey } from "../src/crypto";
+import { rc4, deriveObjectKey } from "../src/utils/crypto";
 
 test("Features: Document Metadata (Info dictionary)", () => {
   const doc = new MheePDF({

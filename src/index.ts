@@ -1,5 +1,10 @@
 export { PDFEngine } from "./engine";
-export { MheePDF, type MheePDFOptions, type PDFEncryptionOptions, TemplateLoopComponent } from "./document";
+export {
+  MheePDF,
+  type MheePDFOptions,
+  type PDFEncryptionOptions,
+  TemplateLoopComponent,
+} from "./document";
 export { serialize } from "./object/serialize";
 export { PDFIndirectBaseObject } from "./object/indirect/baseIndirect";
 export { PDFCatalogObject } from "./object/indirect/catalog";
@@ -18,5 +23,5 @@ export { Table, TableCell, type CellContent } from "./components/table";
 export { Image, JpegImage, PngImage, type ImageOptions } from "./components/image/index";
 export { Line, type LineOptions } from "./components/line";
 export { Svg, type SvgOptions } from "./components/svg";
-export { Color } from "./color";
+export { Color } from "./utils/color";
 export type { Component, LayoutContext } from "./layout";

@@ -2,7 +2,7 @@ import { PDFIndirectBaseObject } from "./baseIndirect";
 import { PDFIndirectStreamObject } from "./stream";
 import * as opentype from "opentype.js";
 import * as hb from "harfbuzzjs";
-import { ensureBuffer } from "../../utils";
+import { ensureBuffer } from "../../utils/buffer";
 
 export class PDFType0FontObject extends PDFIndirectBaseObject {
   override _type: string = "fontType0";

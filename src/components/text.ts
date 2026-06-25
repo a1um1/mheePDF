@@ -1,7 +1,7 @@
 import type { Component, LayoutContext } from "../layout";
 import type { PDFType0FontObject } from "../object/indirect/fontType0";
 import type { PDFPageWriter } from "../writer";
-import { Color } from "../color";
+import { Color } from "../utils/color";
 
 export type TextOptions = {
   font?: string | PDFType0FontObject;
@@ -48,9 +48,10 @@ export class Text implements Component {
     const lh = this.getLineHeight(size, context);
 
     const lines = this.wrapText(this.text, width, font, size, context, charSpacing);
-    const height = (context as any).snug && lines.length > 0
-      ? (lines.length - 1) * lh + size
-      : lines.length * lh;
+    const height =
+      (context as any).snug && lines.length > 0
+        ? (lines.length - 1) * lh + size
+        : lines.length * lh;
     return {
       width,
       height,
@@ -77,7 +78,9 @@ export class Text implements Component {
     const lines = this.wrapText(this.text, width, font, size, context, charSpacing);
     const isSnug = (context as any).snug;
     const maxLines = isSnug
-      ? (availableHeight >= size ? Math.floor((availableHeight - size) / lh) + 1 : 0)
+      ? availableHeight >= size
+        ? Math.floor((availableHeight - size) / lh) + 1
+        : 0
       : Math.floor(availableHeight / lh);
 
     if (maxLines <= 0) {
@@ -91,7 +94,7 @@ export class Text implements Component {
     let capHeight = size * 0.7;
     if (font && typeof font !== "string" && "font" in font) {
       const otFont = (font as any).font;
-      const rawCap = otFont.tables.os2?.sCapHeight || otFont.ascender || (otFont.unitsPerEm * 0.7);
+      const rawCap = otFont.tables.os2?.sCapHeight || otFont.ascender || otFont.unitsPerEm * 0.7;
       capHeight = (rawCap / otFont.unitsPerEm) * size;
     }
     const boxHeight = isSnug ? size : lh;

@@ -2,9 +2,9 @@ import type { PDFPageObject } from "./object/indirect/page";
 import { PDFIndirectStreamObject } from "./object/indirect/stream";
 import { PDFType0FontObject } from "./object/indirect/fontType0";
 import { PDFFontObject } from "./object/indirect/font";
-import { Color } from "./color";
+import { Color } from "./utils/color";
 import * as hb from "harfbuzzjs";
-import { getStandardFontTextWidth } from "./standardFonts";
+import { getStandardFontTextWidth } from "./utils/standardFonts";
 import type { PDFEngine } from "./engine";
 import { escapePDFString } from "./object/serialize";
 

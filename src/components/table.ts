@@ -1,7 +1,7 @@
 import type { Component, LayoutContext } from "../layout";
 import type { PDFPageWriter } from "../writer";
 import { Text } from "./text";
-import { Color } from "../color";
+import { Color } from "../utils/color";
 
 export type CellContent =
   | Component
@@ -55,7 +55,10 @@ export class TableCell implements Component {
 
     const remainder = this.content.draw(writer, x, drawY, width, availableHeight, context);
     if (remainder) {
-      return new TableCell(remainder, { backgroundColor: this.backgroundColor, valign: this.valign });
+      return new TableCell(remainder, {
+        backgroundColor: this.backgroundColor,
+        valign: this.valign,
+      });
     }
     return null;
   }
@@ -375,7 +378,8 @@ export class Table implements Component {
 
     if (cell && typeof cell === "object" && "content" in cell) {
       const innerComp = this.toComponent(cell.content, colIdx);
-      const valign = ("valign" in cell ? cell.valign : undefined) ?? this.valigns?.[colIdx] ?? this.valign;
+      const valign =
+        ("valign" in cell ? cell.valign : undefined) ?? this.valigns?.[colIdx] ?? this.valign;
       return new TableCell(innerComp, { backgroundColor: cell.backgroundColor, valign });
     }
 

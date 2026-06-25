@@ -1,5 +1,5 @@
 import { PDFIndirectBaseObject } from "./baseIndirect";
-import { formatDateToPDFString } from "../../crypto";
+import { formatDateToPDFString } from "../../utils/crypto";
 
 export interface PDFInfoDict {
   Title?: string;

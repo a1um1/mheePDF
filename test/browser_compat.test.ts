@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { ensureBuffer } from "../src/utils";
+import { ensureBuffer } from "../src/utils/buffer";
 import { MheePDF } from "../src";
 import { Buffer } from "buffer";
 

@@ -1,5 +1,5 @@
 import { Buffer } from "buffer";
-import { ensureBuffer } from "../../utils";
+import { ensureBuffer } from "../../utils/buffer";
 import type { Component, LayoutContext } from "../../layout";
 import type { PDFPageWriter } from "../../writer";
 import { Svg } from "../svg";
@@ -86,7 +86,7 @@ export class Image implements Component {
     y: number,
     width: number,
     availableHeight: number,
-    context: LayoutContext
+    context: LayoutContext,
   ): Component | null {
     return this.delegate.draw(writer, x, y, width, availableHeight, context);
   }
