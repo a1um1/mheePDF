@@ -1,6 +1,8 @@
 import DefaultTheme from 'vitepress/theme'
+import { h } from 'vue'
 import './custom.css'
 import ExampleViewer from './components/ExampleViewer.vue'
+import NavBrandVersion from './components/NavBrandVersion.vue'
 
 function updateRowVisibilities(tbody: HTMLElement) {
   const rows = Array.from(tbody.querySelectorAll('tr'));
@@ -44,6 +46,11 @@ function updateRowVisibilities(tbody: HTMLElement) {
 
 export default {
   extends: DefaultTheme,
+  Layout: () => {
+    return h(DefaultTheme.Layout, null, {
+      'nav-bar-title-after': () => h(NavBrandVersion),
+    })
+  },
   enhanceApp({ app }) {
     app.component('ExampleViewer', ExampleViewer)
 
