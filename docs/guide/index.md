@@ -12,7 +12,7 @@ MheePDF lets you programmatically build professional PDF documents — from simp
 - ✏️ **Lines** — solid, dashed, dotted horizontal dividers
 - 🇹🇭 **Thai language** — correct vowel and tone-mark placement via HarfBuzz
 - 🔐 **Encryption** — RC4 password protection with permission flags
-- 🔄 **Templates & loops** — `&#123;&#123;variable&#125;&#125;` interpolation and array-driven row generation
+- 🔄 **Templates & loops** — `{{variable}}` interpolation and array-driven row generation
 - 📏 **Flexible page sizing** — fixed, landscape, auto-height (receipts), custom paper
 - 🖼️ **Background images** — full-page letterheads and certificate templates
 - 📝 **Document metadata** — title, author, keywords, dates
