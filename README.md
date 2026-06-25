@@ -2,7 +2,9 @@
 
 # MheePDF - หมี PDF
 [![Publish to npm](https://github.com/a1um1/mheePDF/actions/workflows/publish.yml/badge.svg)](https://github.com/a1um1/mheePDF/actions/workflows/publish.yml)
-![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/a1um1/mheePDF)
+[![npm version](https://img.shields.io/npm/v/mheepdf)](https://www.npmjs.com/package/mheepdf)
+[![npm bundle size](https://img.shields.io/bundlephobia/minzip/mheepdf)](https://bundlephobia.com/package/mheepdf)
+[![npm unpacked size](https://img.shields.io/npm/unpacked-size/mheepdf)](https://www.npmjs.com/package/mheepdf)
 
 > [!IMPORTANT]
 > This project is currently under development and may not be production-ready. Use with caution.
