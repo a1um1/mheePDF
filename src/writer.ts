@@ -51,7 +51,7 @@ export class PDFPageWriter {
     return resourcesObj;
   }
 
-  private applyColorOpacity(color: Color, type: "fill" | "stroke"): void {
+  public applyColorOpacity(color: Color, type: "fill" | "stroke"): void {
     const alpha = color.getAlpha();
     if (alpha < 1) {
       const alphaKey = `GS_Opacity_${alpha.toFixed(2).replace(".", "_")}`;

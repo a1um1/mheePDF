@@ -44,4 +44,3 @@ await pdf.addImage("assets/illustration.svg", {
 });
 ```
 
-*Note: For SVG graphics, MheePDF uses `@resvg/resvg-js` to ensure pixel-perfect vector rasterization.*

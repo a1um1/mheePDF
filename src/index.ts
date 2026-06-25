@@ -17,5 +17,6 @@ export { Text, type TextOptions } from "./components/text";
 export { Table, TableCell, type CellContent } from "./components/table";
 export { Image, type ImageOptions } from "./components/image";
 export { Line, type LineOptions } from "./components/line";
+export { Svg, type SvgOptions } from "./components/svg";
 export { Color } from "./color";
 export type { Component, LayoutContext } from "./layout";

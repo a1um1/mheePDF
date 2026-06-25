@@ -9,6 +9,7 @@ import { Text, type TextOptions } from "./components/text";
 import { Image, type ImageOptions } from "./components/image";
 import { Table } from "./components/table";
 import { Line, type LineOptions } from "./components/line";
+import { Svg, type SvgOptions } from "./components/svg";
 import { PDFInfoObject } from "./object/indirect/info";
 import { PDFEncryptObject } from "./object/indirect/encrypt";
 import { getStandardFontTextWidth } from "./standardFonts";
@@ -192,6 +193,10 @@ export class MheePDF<T = any> {
   }
   addLine(options?: LineOptions): this {
     this.components.push(new Line(options));
+    return this;
+  }
+  addSvg(source: string | Buffer, options?: SvgOptions): this {
+    this.components.push(new Svg(source, options));
     return this;
   }
   addTemplateLoop(arrayPath: string, templateComponents: Component[]): this {

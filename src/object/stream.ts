@@ -1,6 +1,6 @@
 import { Buffer } from "buffer";
 import { serialize } from "./serialize";
-import { deflateSync } from "fflate";
+import { zlibSync } from "fflate";
 
 export class PDFStreamObject {
   public _type: string = "stream";
@@ -44,7 +44,7 @@ export class PDFStreamObject {
     if (shouldCompress && !isAlreadyCompressedOrDCT) {
       const rawData = typeof this.value === "string" ? Buffer.from(this.value, "utf-8") : this.value;
       try {
-        streamData = Buffer.from(deflateSync(rawData));
+        streamData = Buffer.from(zlibSync(rawData));
         if (!dict.Filter) {
           dict.Filter = "/FlateDecode";
         } else if (Array.isArray(dict.Filter)) {
