@@ -6,12 +6,12 @@ MheePDF has a built-in templating system for generating data-driven documents. I
 
 There are two main concepts:
 
-1. **Variable Interpolation** — embed `&#123;&#123;variable.path&#125;&#125;` placeholders in text strings. They are resolved against the data you pass to `generate()`.
+1. **Variable Interpolation** — embed <code v-pre>{{variable.path}}</code> placeholders in text strings. They are resolved against the data you pass to `generate()`.
 2. **Template Loops** — use `addTemplateLoop` to repeat a set of components (or table rows) for every item in an array inside your data.
 
 ## Variable Interpolation
 
-Any string argument (text content, image path, color) can contain `&#123;&#123;...&#125;&#125;` placeholders:
+Any string argument (text content, image path, color) can contain <code v-pre>{{...}}</code> placeholders:
 
 ```typescript
 pdf.addText("Invoice for: {{customer.name}}");
@@ -41,7 +41,7 @@ Repeats a list of components for every element in a nested array of your data.
 | Parameter | Type | Description |
 |---|---|---|
 | `arrayPath` | `string` | Dot-separated path to the array in your data object (e.g. `"items"`, `"order.lines"`). |
-| `components` | `Component[]` | Components to render once per array element. Use `&#123;&#123;item.*&#125;&#125;` inside them. |
+| `components` | `Component[]` | Components to render once per array element. Use <code v-pre>{{item.*}}</code> inside them. |
 
 ## Table Row Loops
 
