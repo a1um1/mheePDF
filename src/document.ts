@@ -6,7 +6,7 @@ import { PDFEngine } from "./engine";
 import { PDFType0FontObject } from "./object/indirect/fontType0";
 import type { Component, LayoutContext } from "./layout";
 import { Text, type TextOptions } from "./components/text";
-import { Image, type ImageOptions } from "./components/image";
+import { Image, type ImageOptions } from "./components/image/index";
 import { Table } from "./components/table";
 import { Line, type LineOptions } from "./components/line";
 import { Svg, type SvgOptions } from "./components/svg";
