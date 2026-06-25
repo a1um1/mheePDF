@@ -204,7 +204,7 @@ function parseStyleAttribute(styleStr: string): Record<string, string> {
 // 4. Path Tokenizer and Command Generator
 function tokenizePathData(d: string): (string | number)[] {
   const result: (string | number)[] = [];
-  const regex = /([a-df-zAZ-Z])|(-?\d*\.?\d+(?:[eE][-+]?\d+)?)/g;
+  const regex = /([a-df-zA-Z])|(-?\d*\.?\d+(?:[eE][-+]?\d+)?)/g;
   let match;
   while ((match = regex.exec(d)) !== null) {
     if (match[1] !== undefined) {
